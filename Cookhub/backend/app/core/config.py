@@ -1,0 +1,1 @@
+# contient variables d'environnement, jwt secret et config du projet
