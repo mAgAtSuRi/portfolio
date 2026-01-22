@@ -13,6 +13,8 @@ DB:
 => inside psql: CREATE DATABASE cookhub;
 				CREATE USER cookhub_user WITH PASSWORD 'supersecret';
 				GRANT ALL PRIVILEGES ON DATABASE cookhub TO cookhub_user;
+- connect to cookhub as user: psql -U user -d cookhub -h localhost
+
 
 Create .env (backend/.env) file and add the URL_DATABASE= postgresql://cookhub_user:password@localhost:5432/cookhub with Postgre username and password used during creation of the db.
 
