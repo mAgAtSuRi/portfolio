@@ -6,7 +6,7 @@ import re
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
     username = Column(String(50), nullable=False)
@@ -14,12 +14,13 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     is_admin = Column(Boolean, default=False)
 
-    def __init__(self, username, email, password, is_admin=False):
+    def __init__(self, username, email, password=None, is_admin=False):
         super().__init__()
         self.username = username
         self.email = email
-        self.hashed_password = self.hash_password(password)
         self.is_admin = is_admin
+        if password:
+            self.hashed_password = self.hash_password(password)
 
     def hash_password(self, password):
         password_bytes = password.encode("utf-8")
@@ -30,7 +31,7 @@ class User(Base):
     def verify_password(self, password):
         password_bytes = password.encode("utf-8")
         hashed_bytes = self.hashed_password.encode("utf-8")
-        return bcrypt.checkpw(hashed_bytes, password_bytes)
+        return bcrypt.checkpw(password_bytes, hashed_bytes)
 
     @validates('email')
     def validate_email(self, key, value):
