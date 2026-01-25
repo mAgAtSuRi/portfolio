@@ -1,3 +1,4 @@
+# Association table that allows to modify an ingredient without changing the ingredient in the recipe
 from ..db.base import Base
 from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean
 
