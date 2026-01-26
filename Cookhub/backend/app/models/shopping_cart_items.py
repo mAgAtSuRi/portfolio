@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean
 
 
 class ShoppingCartItem(Base):
-    __tablename__ = "sopping_cart_items"
+    __tablename__ = "shopping_cart_items"
 
     id = Column(Integer, primary_key=True)
     shopping_cart_id = Column(Integer, ForeignKey("shopping_carts.id"), nullable=False)
