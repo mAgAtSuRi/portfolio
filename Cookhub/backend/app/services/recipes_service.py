@@ -22,7 +22,7 @@ class RecipesFacade:
         ingredient.price = new_price
         self.ingredients_repo.session.commit()
 
-    def change_quantity_ingrdient(self, ingredient_id, new_quantity):
+    def change_quantity_ingredient(self, ingredient_id, new_quantity):
         ingredient = self.ingredients_repo.get(ingredient_id)
         ingredient.quantity = new_quantity
         self.ingredients_repo.session.commit()

@@ -24,3 +24,10 @@ class ShoppingCartItemRepository(SqlAlchemyRepository):
             .filter_by(shopping_cart_id=shopping_cart_id, ingredient_id=ingredient_id)
             .first()
         )
+
+    def find_by_cart_and_recipe(self, shopping_cart_id, recipe_id):
+        return (
+            self.session.query(self.model)
+            .filter_by(shopping_cart_id=shopping_cart_id, recipe_id=recipe_id)
+            .all()
+        )

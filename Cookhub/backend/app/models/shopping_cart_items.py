@@ -9,5 +9,6 @@ class ShoppingCartItems(Base):
     id = Column(Integer, primary_key=True)
     shopping_cart_id = Column(Integer, ForeignKey("shopping_carts.id"), nullable=False)
     ingredient_id = Column(Integer, ForeignKey("ingredients.id"), nullable=False)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=True)
     quantity = Column(Float, nullable=False)
     checked = Column(Boolean, nullable=False)
