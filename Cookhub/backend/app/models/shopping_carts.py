@@ -2,7 +2,7 @@ from ..db.base import Base
 from sqlalchemy import Column, Integer, ForeignKey
 
 
-class ShoppingCart(Base):
+class ShoppingCarts(Base):
     __tablename__ = "shopping_carts"
 
     id = Column(Integer, primary_key=True)

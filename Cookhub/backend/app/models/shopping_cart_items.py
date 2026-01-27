@@ -3,7 +3,7 @@ from ..db.base import Base
 from sqlalchemy import Column, Integer, ForeignKey, Float, Boolean
 
 
-class ShoppingCartItem(Base):
+class ShoppingCartItems(Base):
     __tablename__ = "shopping_cart_items"
 
     id = Column(Integer, primary_key=True)

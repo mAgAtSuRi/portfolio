@@ -2,7 +2,7 @@ from ..db.base import Base
 from sqlalchemy import Column, String, Integer, Float, ForeignKey
 
 
-class Recipe(Base):
+class Recipes(Base):
     __tablename__ = "recipes"
 
     id = Column(Integer, primary_key=True)
