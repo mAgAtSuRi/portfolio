@@ -19,13 +19,15 @@ class RecipesFacade:
 
     def change_price_ingredient(self, ingredient_id, new_price):
         ingredient = self.ingredients_repo.get(ingredient_id)
+        if not ingredient:
+            raise ValueError('Ingredient not found')
         ingredient.price = new_price
-        self.ingredients_repo.session.commit()
 
     def change_quantity_ingredient(self, ingredient_id, new_quantity):
         ingredient = self.ingredients_repo.get(ingredient_id)
+        if not ingredient:
+            raise ValueError('Ingredient not found')
         ingredient.quantity = new_quantity
-        self.ingredients_repo.session.commit()
 
     def get_cost_recipe(self, recipe_id):
         ingredients_recipe = self.ingredients_repo.get_by_recipe(recipe_id)
@@ -35,4 +37,6 @@ class RecipesFacade:
 
     def remove_ingredient(self, ingredient_id):
         ingredient = self.ingredients_repo.get(ingredient_id)
+        if not ingredient:
+            raise ValueError('Ingredient not found')
         self.ingredients_repo.delete(ingredient)

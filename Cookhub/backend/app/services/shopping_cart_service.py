@@ -57,7 +57,7 @@ class ShoppingCartsFacade:
         else:
             item = ShoppingCartItems(
                 shopping_cart_id=cart_id,
-                ingredient=ingredient.id,
+                ingredient_id=ingredient.id,
                 quantity=ingredient.quantity,
                 unit_price=ingredient.price,
                 checked=False,
@@ -65,7 +65,11 @@ class ShoppingCartsFacade:
             self.shopping_cart_item_repo.add(item)
 
     def update_ingredient(self, cart_id, ingredient_id, quantity, price):
-        cart_item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(cart_id, ingredient_id)
+        cart_item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
+            cart_id, ingredient_id
+        )
+        if not cart_item:
+            raise ValueError("Ingredient not found")
         cart_item.quantity = quantity
         cart_item.unit_price = price
 
@@ -80,16 +84,21 @@ class ShoppingCartsFacade:
 
     def toggle_item(self, cart_item_id):
         item = self.shopping_cart_item_repo.get(cart_item_id)
+        if not item:
+            raise ValueError("Item not found")
         item.checked = not item.checked
         self.calculate_cart_price(item.shopping_cart_id)
 
     def delete_ingredient_from_cart(self, cart_id, ingredient_id):
-        item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(cart_id, ingredient_id)
+        item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
+            cart_id, ingredient_id
+        )
         if item:
             self.shopping_cart_item_repo.delete(item)
-            self.calculate_cart_price(cart_id)
+        self.calculate_cart_price(cart_id)
 
     def delete_recipe_from_cart(self, cart_id, recipe_id):
         items = self.shopping_cart_item_repo.find_by_cart_and_recipe(cart_id, recipe_id)
         for item in items:
-            self.delete_ingredient_from_cart(cart_id, item.ingredient.id)
+            self.shopping_cart_item_repo.delete(item)
+        self.calculate_cart_price(cart_id)
