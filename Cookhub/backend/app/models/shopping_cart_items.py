@@ -11,4 +11,5 @@ class ShoppingCartItems(Base):
     ingredient_id = Column(Integer, ForeignKey("ingredients.id"), nullable=False)
     recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=True)
     quantity = Column(Float, nullable=False)
-    checked = Column(Boolean, nullable=False)
+    unit_price = Column(Integer, nullable=False)
+    checked = Column(Boolean, nullable=False, default=False)
