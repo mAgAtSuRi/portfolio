@@ -18,10 +18,11 @@ DB:
 
 Create .env (backend/.env) file and add the URL_DATABASE= postgresql://cookhub_user:password@localhost:5432/cookhub with Postgre username and password used during creation of the db.
 
-Lancer le serveur: uvicorn app.main:app --reload
 
 alembic:
 	purpose:to allow change to my models like add a column, delete a table etc
 	initialise: alembic init alembic
 	generate migration file: alembic revision --autogenerate -m "initial schema"
 	apply migration to db: alembic upgrade head
+
+FastAPI/Uvicorn: pip install fastapi uvicorn Lancer le serveur: uvicorn app.main:app --reload

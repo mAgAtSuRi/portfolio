@@ -1,5 +1,5 @@
-from crud.users_repository import UsersRepository
-from models.users import User
+from app.crud.users_repository import UsersRepository
+from app.models.users import User
 
 
 class UsersFacade:
@@ -12,6 +12,9 @@ class UsersFacade:
 
     def get_user(self, user_id):
         return self.user_repo.get(user_id)
+
+    def get_all_user(self):
+        return self.user_repo.list()
 
     def get_user_by_email(self, email):
         return self.user_repo.get_by_email(email)
