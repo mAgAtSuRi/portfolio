@@ -8,3 +8,6 @@ class UsersRepository(SqlAlchemyRepository):
 
     def get_by_email(self, email):
         return self.session.query(self.model).filter_by(email=email).first()
+
+    def save(self):
+        self.session.commit()
