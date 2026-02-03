@@ -1,5 +1,5 @@
 from ..db.base import Base
-from sqlalchemy import Column, String, Integer, Float, ForeignKey
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, Text
 
 
 class Recipes(Base):
@@ -9,3 +9,4 @@ class Recipes(Base):
     name = Column(String(255), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     total_price = Column(Integer)  # attention prix stocké en centimes (1234 = 12,34)
+    description = Column(Text, nullable=True)

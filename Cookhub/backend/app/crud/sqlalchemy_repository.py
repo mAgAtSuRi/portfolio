@@ -18,3 +18,6 @@ class SqlAlchemyRepository:
     def delete(self, obj):
         self.session.delete(obj)
         self.session.commit()
+
+    def save(self):
+        self.session.commit()

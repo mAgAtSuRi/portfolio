@@ -1,7 +1,7 @@
-from crud.recipes_repository import RecipesRepository
-from crud.ingredients_repository import IngredientsRepository
-from models.recipes import Recipes
-from models.ingredients import Ingredients
+from app.crud.recipes_repository import RecipesRepository
+from app.crud.ingredients_repository import IngredientsRepository
+from app.models.recipes import Recipes
+from app.models.ingredients import Ingredients
 
 
 class RecipesFacade:
@@ -10,24 +10,40 @@ class RecipesFacade:
         self.ingredients_repo = IngredientsRepository(session)
 
     def create_recipe(self, name, user_id):
-        recipe = Recipes(name, user_id)
-        return self.recipes_repo.add(recipe)
+        recipe = Recipes(name=name, user_id=user_id)
+        self.recipes_repo.add(recipe)
+        return recipe
 
     def add_ingredient(self, name, quantity, price, recipe_id):
         ingredient = Ingredients(name, quantity, price, recipe_id)
         return self.ingredients_repo.add(ingredient)
+
+    def add_description(self, recipe_id, description):
+        recipe = self.recipes_repo.get(recipe_id)
+        if not recipe:
+            raise ValueError("Recipe not found")
+        recipe.description = description
+        self.recipes_repo.save()
+
+    def get_recipe(self, recipe_id):
+        return self.recipes_repo.get(recipe_id)
+
+    def get_all_recipes(self, user_id):
+        return self.recipes_repo.find_by_user(user_id)
 
     def change_price_ingredient(self, ingredient_id, new_price):
         ingredient = self.ingredients_repo.get(ingredient_id)
         if not ingredient:
             raise ValueError('Ingredient not found')
         ingredient.price = new_price
+        self.ingredients_repo.save()
 
     def change_quantity_ingredient(self, ingredient_id, new_quantity):
         ingredient = self.ingredients_repo.get(ingredient_id)
         if not ingredient:
             raise ValueError('Ingredient not found')
         ingredient.quantity = new_quantity
+        self.ingredients_repo.save()
 
     def get_cost_recipe(self, recipe_id):
         ingredients_recipe = self.ingredients_repo.get_by_recipe(recipe_id)

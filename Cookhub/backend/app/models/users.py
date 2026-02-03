@@ -41,3 +41,5 @@ class User(Base):
         if not re.match(email_pattern, value):
             raise ValueError("Invalid email format")
         return value.strip()
+
+# Add login here

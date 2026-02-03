@@ -11,6 +11,7 @@ class UsersFacade:
         user = User(username, email, password, is_admin)
         try:
             self.user_repo.add(user)
+            return user
         except IntegrityError:
             self.user_repo.session.rollback()
             raise ValueError("User with this email already exists")

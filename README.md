@@ -10,6 +10,8 @@ DB:
 - Install Postgre: sudo apt install postgresql postgresql-contrib
 - Start service: sudo service postgresql start
 - connect as super user postgre: sudo -u postgres psql
+- reconnect to db psql -h localhost -U tristan -d cookhub
+
 => inside psql: CREATE DATABASE cookhub;
 				CREATE USER cookhub_user WITH PASSWORD 'supersecret';
 				GRANT ALL PRIVILEGES ON DATABASE cookhub TO cookhub_user;

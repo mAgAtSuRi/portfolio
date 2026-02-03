@@ -48,20 +48,23 @@ def list_users(db=Depends(get_db)):
 
 
 @router.get("/users/{user_id}")
-def get_user(user_id, db=Depends(get_db)):
+def get_user(user_id: int, db=Depends(get_db)):
     facade = UsersFacade(db)
     return {"user": facade.get_user(user_id)}
 
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id, db=Depends(get_db)):
+def delete_user(user_id: int, db=Depends(get_db)):
     facade = UsersFacade(db)
-    facade.delete_user(user_id)
-    return {"status": "user deleted"}
+    try:
+        facade.delete_user(user_id)
+        return {"status": "user deleted"}
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
 
 @router.put("/users/{user_id}/email")
-def update_email(user_id, payload: EmailUpdate, db=Depends(get_db)):
+def update_email(user_id: int, payload: EmailUpdate, db=Depends(get_db)):
     facade = UsersFacade(db)
     try:
         facade.update_email_user(user_id, payload.new_email)
@@ -71,7 +74,7 @@ def update_email(user_id, payload: EmailUpdate, db=Depends(get_db)):
 
 
 @router.put("/users/{user_id}/password")
-def update_password(user_id, payload: PasswordUpdate, db=Depends(get_db)):
+def update_password(user_id: int, payload: PasswordUpdate, db=Depends(get_db)):
     facade = UsersFacade(db)
     try:
         facade.update_password_user(user_id, payload.new_password)

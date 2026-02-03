@@ -1,8 +1,8 @@
-from crud.ingredients_repository import IngredientsRepository
-from crud.recipes_repository import RecipesRepository
-from crud.shopping_carts_repository import ShoppingCartRepository
-from crud.shopping_cart_item_repository import ShoppingCartItemRepository
-from models.shopping_carts import ShoppingCarts
+from app.crud.ingredients_repository import IngredientsRepository
+from app.crud.recipes_repository import RecipesRepository
+from app.crud.shopping_carts_repository import ShoppingCartRepository
+from app.crud.shopping_cart_item_repository import ShoppingCartItemRepository
+from app.models.shopping_carts import ShoppingCarts
 
 # from models.recipes import Recipes
 from models.shopping_cart_items import ShoppingCartItems
