@@ -6,11 +6,11 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.db.base import Base
-from app.models.user import User
-from Cookhub.backend.app.models.recipes import Recipe
-from Cookhub.backend.app.models.ingredients import Ingredient
-from Cookhub.backend.app.models.shopping_carts import ShoppingCart
-from Cookhub.backend.app.models.shopping_cart_items import ShoppingCartItem
+from app.models.users import User
+from app.models.recipes import Recipes
+from app.models.ingredients import Ingredients
+from app.models.shopping_carts import ShoppingCarts
+from app.models.shopping_cart_items import ShoppingCartItems
 
 from app.core.config import DATABASE_URL
 

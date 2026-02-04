@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.db.session import get_db
 from app.services.recipes_service import RecipesFacade
+from enum import Enum
 
 router = APIRouter()
 
@@ -12,10 +13,19 @@ class RecipeCreate(BaseModel):
     user_id: int
 
 
+class UnitEnum(str, Enum):
+    g = "g"
+    kg = "kg"
+    ml = "ml"
+    liter = "l"
+    piece = "piece"
+
+
 class IngredientCreate(BaseModel):
     name: str
-    quantity: float
-    price: int
+    quantity: float = Field(default=1, gt=0)
+    price: int = Field(default=0, ge=0)
+    unit: UnitEnum = UnitEnum.g
 
 
 # Output
@@ -24,6 +34,7 @@ class IngredientOut(BaseModel):
     name: str
     quantity: float
     price: int
+    unit: UnitEnum
 
     class Config:
         orm_mode = True
@@ -45,11 +56,14 @@ class RecipeOut(BaseModel):
 @router.post("/recipes", response_model=RecipeOut)
 def create_recipe(recipe: RecipeCreate, db=Depends(get_db)):
     facade = RecipesFacade(db)
-    recipe = facade.create_recipe(
-        name=recipe.name,
-        user_id=recipe.user_id
-    )
-    return recipe
+    try:
+        recipe = facade.create_recipe(
+            name=recipe.name,
+            user_id=recipe.user_id
+        )
+        return recipe
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/recipes", response_model=list[RecipeOut])
@@ -92,3 +106,18 @@ def get_ingredients_from_recipe(recipe_id: int, db=Depends(get_db)):
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
     return recipe.ingredients
+
+
+@router.delete("/recipes/{recipe_id}/ingredients/{ingredient_id}")
+def delete_ingredient_from_recipe(recipe_id: int, ingredient_id: int, db=Depends(get_db)):
+    facade = RecipesFacade(db)
+    try:
+        ingredient = facade.remove_ingredient(recipe_id, ingredient_id)  
+        return {"status": f"{ingredient.name} deleted"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# DELETE /recipes/{id}
+# PATCH /recipes/{id}
+# DELETE /recipes/{recipe_id}/ingredients/{ingredient_id}
+# PATCH /ingredients/{ingredient_id}

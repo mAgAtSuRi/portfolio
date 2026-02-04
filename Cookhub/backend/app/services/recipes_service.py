@@ -1,5 +1,6 @@
 from app.crud.recipes_repository import RecipesRepository
 from app.crud.ingredients_repository import IngredientsRepository
+from app.crud.users_repository import UsersRepository
 from app.models.recipes import Recipes
 from app.models.ingredients import Ingredients
 
@@ -8,8 +9,12 @@ class RecipesFacade:
     def __init__(self, session):
         self.recipes_repo = RecipesRepository(session)
         self.ingredients_repo = IngredientsRepository(session)
+        self.users_repo = UsersRepository(session)
 
     def create_recipe(self, name, user_id):
+        user = self.users_repo.get(user_id)
+        if not user:
+            raise ValueError("User not found")
         recipe = Recipes(name=name, user_id=user_id)
         self.recipes_repo.add(recipe)
         return recipe
@@ -43,6 +48,9 @@ class RecipesFacade:
     def get_all_recipes(self):
         return self.recipes_repo.list()
 
+    def get_ingredient(self, ingredient_id):
+        return self.ingredients_repo.get(ingredient_id)
+
     def change_price_ingredient(self, ingredient_id, new_price):
         ingredient = self.ingredients_repo.get(ingredient_id)
         if not ingredient:
@@ -63,8 +71,11 @@ class RecipesFacade:
         total_cost = sum(ing.price * ing.quantity for ing in ingredients_recipe)
         return total_cost
 
-    def remove_ingredient(self, ingredient_id):
+    def remove_ingredient(self, ingredient_id, recipe_id):
         ingredient = self.ingredients_repo.get(ingredient_id)
         if not ingredient:
             raise ValueError('Ingredient not found')
+        if ingredient.recipe_id != recipe_id:
+            raise ValueError("Ingredient doesn't belong to this recipe")
         self.ingredients_repo.delete(ingredient)
+        return ingredient
