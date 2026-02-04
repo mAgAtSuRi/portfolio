@@ -15,7 +15,16 @@ class RecipesFacade:
         return recipe
 
     def add_ingredient(self, name, quantity, price, recipe_id):
-        ingredient = Ingredients(name, quantity, price, recipe_id)
+        recipe = self.recipes_repo.get(recipe_id)
+        if not recipe:
+            raise ValueError("Recipe not found")
+
+        ingredient = Ingredients(
+            name=name,
+            quantity=quantity,
+            price=price,
+            recipe_id=recipe_id
+        )
         return self.ingredients_repo.add(ingredient)
 
     def add_description(self, recipe_id, description):
@@ -28,8 +37,11 @@ class RecipesFacade:
     def get_recipe(self, recipe_id):
         return self.recipes_repo.get(recipe_id)
 
-    def get_all_recipes(self, user_id):
+    def get_all_recipes_by_user(self, user_id):
         return self.recipes_repo.find_by_user(user_id)
+
+    def get_all_recipes(self):
+        return self.recipes_repo.list()
 
     def change_price_ingredient(self, ingredient_id, new_price):
         ingredient = self.ingredients_repo.get(ingredient_id)

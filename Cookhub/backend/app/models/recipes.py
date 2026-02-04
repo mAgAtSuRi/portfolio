@@ -1,5 +1,6 @@
 from ..db.base import Base
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, Text
+from sqlalchemy import Column, String, Integer, ForeignKey, Text
+from sqlalchemy.orm import relationship
 
 
 class Recipes(Base):
@@ -10,3 +11,5 @@ class Recipes(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     total_price = Column(Integer)  # attention prix stocké en centimes (1234 = 12,34)
     description = Column(Text, nullable=True)
+
+    ingredients = relationship("Ingredients", back_populates="recipe", cascade="all")
