@@ -26,12 +26,16 @@ class UnitEnum(str, Enum):
 class IngredientCreate(InputModel):
     name: str
     quantity: float = Field(default=1, gt=0)
-    price: int = Field(default=0, ge=0)
     unit: UnitEnum = UnitEnum.g
+    price: int = Field(default=0, ge=0)
 
 
-class IngredientUpdate(InputModel):
+class IngredientPriceUpdate(InputModel):
     new_price: int
+
+
+class IngredientQuantityUpdate(InputModel):
+    new_quantity: float
 
 
 class RecipeUpdate(InputModel):

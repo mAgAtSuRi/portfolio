@@ -19,7 +19,7 @@ class RecipesFacade:
         self.recipes_repo.add(recipe)
         return recipe
 
-    def add_ingredient(self, name, quantity, price, recipe_id):
+    def add_ingredient(self, name, quantity, unit, price, recipe_id):
         recipe = self.recipes_repo.get(recipe_id)
         if not recipe:
             raise ValueError("Recipe not found")
@@ -27,6 +27,7 @@ class RecipesFacade:
         ingredient = Ingredients(
             name=name,
             quantity=quantity,
+            unit=unit,
             price=price,
             recipe_id=recipe_id
         )
@@ -73,7 +74,10 @@ class RecipesFacade:
         ingredient.price = new_price
         self.ingredients_repo.save()
 
-    def change_quantity_ingredient(self, ingredient_id, new_quantity):
+    def change_quantity_ingredient(self, recipe_id, ingredient_id, new_quantity):
+        recipe = self.get_recipe(recipe_id)
+        if not recipe:
+            raise ValueError("Recipe not found")
         ingredient = self.ingredients_repo.get(ingredient_id)
         if not ingredient:
             raise ValueError('Ingredient not found')
@@ -85,6 +89,13 @@ class RecipesFacade:
         total_price = 0
         total_price = sum(ing.price * ing.quantity for ing in ingredients_recipe)
         return total_price
+
+    def remove_recipe(self, recipe_id):
+        recipe = self.recipes_repo.get(recipe_id)
+        if not recipe:
+            raise ValueError("Recipe not found")
+        self.recipes_repo.delete(recipe)
+        return recipe
 
     def remove_ingredient(self, recipe_id, ingredient_id):
         ingredient = self.ingredients_repo.get(ingredient_id)
