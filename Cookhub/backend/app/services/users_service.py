@@ -48,3 +48,4 @@ class UsersFacade:
         if not user:
             raise ValueError('User not found')
         self.user_repo.delete(user)
+        return user

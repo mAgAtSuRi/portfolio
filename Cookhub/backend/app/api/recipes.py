@@ -1,55 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
 from app.db.session import get_db
 from app.services.recipes_service import RecipesFacade
-from enum import Enum
+from app.schemas.recipes_ingredients import RecipeOut, RecipeCreate, RecipeUpdate, IngredientOut, IngredientCreate, IngredientUpdate
 
 router = APIRouter()
-
-
-# Input
-class RecipeCreate(BaseModel):
-    name: str
-    user_id: int
-
-
-class UnitEnum(str, Enum):
-    g = "g"
-    kg = "kg"
-    ml = "ml"
-    liter = "l"
-    piece = "piece"
-
-
-class IngredientCreate(BaseModel):
-    name: str
-    quantity: float = Field(default=1, gt=0)
-    price: int = Field(default=0, ge=0)
-    unit: UnitEnum = UnitEnum.g
-
-
-# Output
-class IngredientOut(BaseModel):
-    id: int
-    name: str
-    quantity: float
-    price: int
-    unit: UnitEnum
-
-    class Config:
-        orm_mode = True
-
-
-class RecipeOut(BaseModel):
-    id: int
-    name: str
-    user_id: int
-    description: str | None
-    ingredients: list[IngredientOut] = []
-    total_price: int | None
-
-    class Config:
-        orm_mode = True
 
 
 # RECIPES
@@ -59,7 +13,9 @@ def create_recipe(recipe: RecipeCreate, db=Depends(get_db)):
     try:
         recipe = facade.create_recipe(
             name=recipe.name,
-            user_id=recipe.user_id
+            user_id=recipe.user_id,
+            total_price=recipe.total_price,
+            description=recipe.description
         )
         return recipe
     except ValueError as e:
@@ -82,6 +38,21 @@ def get_recipe(recipe_id: int, db=Depends(get_db)):
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe doesn't exist")
     return recipe
+
+
+@router.put("/recipes/{recipe_id}", response_model=RecipeOut)
+def update_recipe(recipe_id: int, payload: RecipeUpdate, db=Depends(get_db)):
+    facade = RecipesFacade(db)
+    try:
+        updated_recipe = facade.update_recipe(
+            recipe_id,
+            payload.name,
+            payload.total_price,
+            payload.description
+        )
+        return updated_recipe
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 # INGREDIENTS
@@ -108,6 +79,16 @@ def get_ingredients_from_recipe(recipe_id: int, db=Depends(get_db)):
     return recipe.ingredients
 
 
+@router.put("/recipes/{recipe_id}/ingredients/{ingredient_id}", response_model=IngredientOut)
+def update_price_ingredient_from_recipe(recipe_id: int, ingredient_id: int, payload: IngredientUpdate, db=Depends(get_db)):
+    facade = RecipesFacade(db)
+    try:
+        facade.change_price_ingredient(recipe_id, ingredient_id, payload.new_price)
+        return facade.get_ingredient(ingredient_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.delete("/recipes/{recipe_id}/ingredients/{ingredient_id}")
 def delete_ingredient_from_recipe(recipe_id: int, ingredient_id: int, db=Depends(get_db)):
     facade = RecipesFacade(db)
@@ -118,6 +99,4 @@ def delete_ingredient_from_recipe(recipe_id: int, ingredient_id: int, db=Depends
         raise HTTPException(status_code=404, detail=str(e))
 
 # DELETE /recipes/{id}
-# PATCH /recipes/{id}
-# DELETE /recipes/{recipe_id}/ingredients/{ingredient_id}
-# PATCH /ingredients/{ingredient_id}
+# PUT /recipes/{id}
