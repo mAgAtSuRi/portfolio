@@ -2,10 +2,9 @@ from app.crud.ingredients_repository import IngredientsRepository
 from app.crud.recipes_repository import RecipesRepository
 from app.crud.shopping_carts_repository import ShoppingCartRepository
 from app.crud.shopping_cart_item_repository import ShoppingCartItemRepository
+from app.crud.users_repository import UsersRepository
 from app.models.shopping_carts import ShoppingCarts
-
-# from models.recipes import Recipes
-from models.shopping_cart_items import ShoppingCartItems
+from app.models.shopping_cart_items import ShoppingCartItems
 
 
 class ShoppingCartsFacade:
@@ -14,15 +13,39 @@ class ShoppingCartsFacade:
         self.recipe_repo = RecipesRepository(session)
         self.shopping_cart_repo = ShoppingCartRepository(session)
         self.shopping_cart_item_repo = ShoppingCartItemRepository(session)
+        self.users_repo = UsersRepository(session)
 
     def create_shopping_cart(self, user_id):
-        shopping_cart = ShoppingCarts(user_id)
+        user = self.users_repo.get(user_id)
+        if not user:
+            raise ValueError("User not found")
+        if user.shopping_carts:
+            raise ValueError("User already has a cart")
+        shopping_cart = ShoppingCarts(user_id=user_id)
         self.shopping_cart_repo.add(shopping_cart)
+        return shopping_cart
+
+    def get_shopping_cart_by_user(self, user_id):
+        user = self.users_repo.get(user_id)
+        if not user:
+            raise ValueError("User not found")
+        cart = self.shopping_cart_repo.get_by_user(user_id)
+        if not cart:
+            raise ValueError("This user doesn't have a cart")
+        return cart
+
+    def get_all_shopping_carts(self):
+        return self.shopping_cart_repo.list()
 
     def add_recipe_to_cart(self, cart_id, recipe_id):
+        shopping_cart = self.shopping_cart_repo.get(cart_id)
+        if not shopping_cart:
+            raise ValueError("Shopping Cart not found")
         recipe = self.recipe_repo.get(recipe_id)
         if not recipe:
             raise ValueError("Recipe not found")
+        if recipe.user_id != shopping_cart.user_id:
+            raise ValueError("Recipe doesn't belong to the user")
 
         ingredients = self.ingredient_repo.get_by_recipe(recipe_id)
 
@@ -45,6 +68,7 @@ class ShoppingCartsFacade:
                 self.shopping_cart_item_repo.add(item)
 
         self.calculate_cart_price(cart_id)
+        return recipe
 
     def add_ingredient_to_cart(self, ingredient_id, cart_id):
         ingredient = self.ingredient_repo.get(ingredient_id)

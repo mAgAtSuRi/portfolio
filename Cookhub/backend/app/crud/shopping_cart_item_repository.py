@@ -1,10 +1,10 @@
-from sqlalchemy_repository import SqlAlchemyRepository
-from ..models.shopping_cart_items import ShoppingCartItem
+from app.crud.sqlalchemy_repository import SqlAlchemyRepository
+from app.models.shopping_cart_items import ShoppingCartItems
 
 
 class ShoppingCartItemRepository(SqlAlchemyRepository):
     def __init__(self, session):
-        super().__init__(session, ShoppingCartItem)
+        super().__init__(session, ShoppingCartItems)
 
     def find_by_shopping_cart(self, shopping_cart_id):
         return (

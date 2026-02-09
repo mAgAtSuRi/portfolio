@@ -1,4 +1,4 @@
-from ..db.base import Base
+from app.db.base import Base
 from sqlalchemy import Column, String, Integer, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
@@ -14,4 +14,4 @@ class Recipes(Base):
 
     users = relationship("User", back_populates="recipes")
     ingredients = relationship("Ingredients", back_populates="recipe", cascade="all")
-    # shopping_cart_items = relationship("ShoppingCartItems", back_populates="recipes")
+    shopping_cart_items = relationship("ShoppingCartItems", back_populates="recipes")

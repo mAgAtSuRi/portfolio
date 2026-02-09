@@ -1,16 +1,25 @@
 from app.crud.users_repository import UsersRepository
+from app.crud.shopping_carts_repository import ShoppingCartRepository
 from app.models.users import User
+from app.models.shopping_carts import ShoppingCarts
 from sqlalchemy.exc import IntegrityError
 
 
 class UsersFacade:
     def __init__(self, session):
         self.user_repo = UsersRepository(session)
+        self.shopping_cart_repo = ShoppingCartRepository(session)
 
     def create_user(self, username, email, password, is_admin):
         user = User(username, email, password, is_admin)
         try:
             self.user_repo.add(user)
+            self.user_repo.session.flush()
+
+            # Create a shopping cart for the new user
+            shopping_cart = ShoppingCarts(user_id=user.id)
+            self.shopping_cart_repo.add(shopping_cart)
+
             return user
         except IntegrityError:
             self.user_repo.session.rollback()

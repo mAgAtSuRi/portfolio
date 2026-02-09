@@ -1,4 +1,4 @@
-from ..db.base import Base
+from app.db.base import Base
 from sqlalchemy import Column, String, Integer, Float, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -14,4 +14,4 @@ class Ingredients(Base):
     recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=True) #An ingredient can exist without recipe (ex: for shopping_cart)
 
     recipe = relationship("Recipes", back_populates="ingredients")
-    # shopping_cart_items = relationship("ShoppingCartItems", back_populates="ingredients")
+    shopping_cart_items = relationship("ShoppingCartItems", back_populates="ingredients")
