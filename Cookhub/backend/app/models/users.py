@@ -1,6 +1,6 @@
 from ..db.base import Base
 from sqlalchemy import Column, String, Boolean, Integer
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 import bcrypt
 import re
 
@@ -13,6 +13,8 @@ class User(Base):
     email = Column(String(120), nullable=False, unique=True)
     hashed_password = Column(String(255), nullable=False)
     is_admin = Column(Boolean, default=False)
+
+    recipes = relationship("Recipes", back_populates="users", cascade="all, delete-orphan")
 
     def __init__(self, username, email, password=None, is_admin=False):
         super().__init__()

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from enum import Enum
 
 
@@ -11,8 +11,14 @@ class InputModel(BaseModel):
 class RecipeCreate(InputModel):
     name: str
     user_id: int
-    total_price: int | None = None
+    total_price: float | None = None
     description: str | None = None
+
+    @field_validator("total_price", mode="before")
+    def convert_price_to_cents(cls, value):
+        if value is None:
+            return None
+        return int(float(value) * 100)
 
 
 class UnitEnum(str, Enum):
@@ -27,11 +33,19 @@ class IngredientCreate(InputModel):
     name: str
     quantity: float = Field(default=1, gt=0)
     unit: UnitEnum = UnitEnum.g
-    price: int = Field(default=0, ge=0)
+    price: float = Field(default=0, ge=0)
+
+    @field_validator("price", mode="before")
+    def convert_price_to_cents(cls, value):
+        return int(float(value) * 100)
 
 
 class IngredientPriceUpdate(InputModel):
-    new_price: int
+    new_price: float
+
+    @field_validator("new_price", mode="before")
+    def convert_price_to_cents(cls, value):
+        return int(float(value) * 100)
 
 
 class IngredientQuantityUpdate(InputModel):
@@ -40,8 +54,14 @@ class IngredientQuantityUpdate(InputModel):
 
 class RecipeUpdate(InputModel):
     name: str | None = None
-    total_price: int | None = None
-    description: str | None
+    total_price: float | None = None
+    description: str | None = None
+
+    @field_validator("total_price", mode="before")
+    def convert_price_to_cents(cls, value):
+        if value is None:
+            return None
+        return int(value * 100)
 
 
 # Output
@@ -49,11 +69,17 @@ class IngredientOut(BaseModel):
     id: int
     name: str
     quantity: float
-    price: int
     unit: UnitEnum
+    price: float
 
     class Config:
         orm_mode = True
+
+    @field_validator("price", mode="before")
+    def convert_price_to_euros(cls, value):
+        if value is None:
+            return None
+        return value / 100
 
 
 class RecipeOut(BaseModel):
@@ -62,7 +88,13 @@ class RecipeOut(BaseModel):
     user_id: int
     description: str | None
     ingredients: list[IngredientOut] = []
-    total_price: int | None
+    total_price: float | None
 
     class Config:
         orm_mode = True
+
+    @field_validator("total_price", mode="before")
+    def convert_price_to_euros(cls, value):
+        if value is None:
+            return None
+        return value / 100
