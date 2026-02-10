@@ -40,3 +40,7 @@ def get_cart_by_user(user_id: int, db=Depends(get_db)):
         return shopping_cart
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/shopping_cart/ingredient")
+def add_ingredient_to_shopping_cart(cart_id, )

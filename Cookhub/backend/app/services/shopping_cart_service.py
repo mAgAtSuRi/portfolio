@@ -1,10 +1,12 @@
 from app.crud.ingredients_repository import IngredientsRepository
+
 from app.crud.recipes_repository import RecipesRepository
 from app.crud.shopping_carts_repository import ShoppingCartRepository
 from app.crud.shopping_cart_item_repository import ShoppingCartItemRepository
 from app.crud.users_repository import UsersRepository
 from app.models.shopping_carts import ShoppingCarts
 from app.models.shopping_cart_items import ShoppingCartItems
+from app.models.ingredients import Ingredients
 
 
 class ShoppingCartsFacade:
@@ -70,23 +72,38 @@ class ShoppingCartsFacade:
         self.calculate_cart_price(cart_id)
         return recipe
 
-    def add_ingredient_to_cart(self, ingredient_id, cart_id):
-        ingredient = self.ingredient_repo.get(ingredient_id)
+    def add_ingredient_to_cart(self, cart_id, name, quantity, unit, price):
+        # Check if cart exists
+        shopping_cart = self.shopping_cart_repo.get(cart_id)
+        if not shopping_cart:
+            raise ValueError("Shopping cart not found")
 
-        item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
-            cart_id, ingredient_id
-        )
+        # Check if ingredient exists in cart
+        item = self.ingredients_repo.get_cart_item_by_name(name, cart_id)
         if item:
-            item.quantity += ingredient.quantity
-        else:
-            item = ShoppingCartItems(
-                shopping_cart_id=cart_id,
-                ingredient_id=ingredient.id,
-                quantity=ingredient.quantity,
-                unit_price=ingredient.price,
-                checked=False,
-            )
-            self.shopping_cart_item_repo.add(item)
+            item.quantity += quantity
+            self.shopping_cart_item_repo.save()
+            return item
+
+        # Else create new ingredient for cart
+        ingredient = Ingredients(
+            name=name,
+            quantity=quantity,
+            unit=unit,
+            price=price,
+            recipe_id=None
+        )
+        ingredient = self.ingredients_repo.add(ingredient)
+
+        # Create ShoppingCartItem for the new ingredient
+        item = ShoppingCartItems(
+            shopping_cart_id=cart_id,
+            ingredient_id=ingredient.id,
+            quantity=ingredient.quantity,
+            unit_price=ingredient.price,
+            checked=False,
+        )
+        return self.shopping_cart_item_repo.add(item)
 
     def update_ingredient(self, cart_id, ingredient_id, quantity, price):
         cart_item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
