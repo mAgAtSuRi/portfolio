@@ -52,6 +52,9 @@ def update_email(user_id: int, payload: EmailUpdate, db=Depends(get_db)):
 @router.put("/users/{user_id}/password")
 def update_password(user_id: int, payload: PasswordUpdate, db=Depends(get_db)):
     facade = UsersFacade(db)
+    user = facade.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     try:
         facade.update_password_user(user_id, payload.new_password)
         return {"status": "password updated"}

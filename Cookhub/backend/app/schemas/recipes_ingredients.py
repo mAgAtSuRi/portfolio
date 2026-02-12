@@ -72,10 +72,10 @@ class IngredientOut(BaseModel):
     unit: UnitEnum
     price: float
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
     @field_validator("price", mode="before")
+    @classmethod
     def convert_price_to_euros(cls, value):
         if value is None:
             return None
@@ -90,10 +90,17 @@ class RecipeOut(BaseModel):
     ingredients: list[IngredientOut] = []
     total_price: float | None
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
+    @field_validator("ingredients", mode="before")
+    @classmethod
+    def convert_ingredient(cls, value):
+        if not value:
+            return []
+        return [IngredientOut.from_orm(ing) if not isinstance(ing, dict) else ing for ing in value]
 
     @field_validator("total_price", mode="before")
+    @classmethod
     def convert_price_to_euros(cls, value):
         if value is None:
             return None

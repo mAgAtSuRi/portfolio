@@ -17,19 +17,21 @@ def create_recipe(recipe: RecipeCreate, db=Depends(get_db)):
             total_price=recipe.total_price,
             description=recipe.description
         )
-        return recipe
+        return RecipeOut.from_orm(recipe)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/recipes", response_model=list[RecipeOut])
 def get_all_recipes(db=Depends(get_db)):
-    return RecipesFacade(db).get_all_recipes()
+    recipes = RecipesFacade(db).get_all_recipes()
+    return [RecipeOut.from_orm(recipe) for recipe in recipes]
 
 
 @router.get("/users/{user_id}/recipes", response_model=list[RecipeOut])
 def get_all_recipes_by_user(user_id: int, db=Depends(get_db)):
-    return RecipesFacade(db).get_all_recipes_by_user(user_id)
+    recipes = RecipesFacade(db).get_all_recipes_by_user(user_id)
+    return [RecipeOut.from_orm(recipe) for recipe in recipes]
 
 
 @router.get("/recipes/{recipe_id}", response_model=RecipeOut)
@@ -37,7 +39,7 @@ def get_recipe(recipe_id: int, db=Depends(get_db)):
     recipe = RecipesFacade(db).get_recipe(recipe_id)
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe doesn't exist")
-    return recipe
+    return RecipeOut.from_orm(recipe)
 
 
 @router.put("/recipes/{recipe_id}", response_model=RecipeOut)
@@ -50,7 +52,7 @@ def update_recipe(recipe_id: int, payload: RecipeUpdate, db=Depends(get_db)):
             payload.total_price,
             payload.description
         )
-        return updated_recipe
+        return RecipeOut.from_orm(updated_recipe)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -79,7 +81,7 @@ def add_ingredient_to_recipe(ingredient: IngredientCreate, recipe_id: int, db=De
         ingredient.price,
         recipe_id=recipe_id
     )
-    return ingredient
+    return IngredientOut.from_orm(ingredient)
 
 
 @router.get("/recipes/{recipe_id}/ingredients", response_model=list[IngredientOut])
@@ -87,7 +89,7 @@ def get_ingredients_from_recipe(recipe_id: int, db=Depends(get_db)):
     recipe = RecipesFacade(db).get_recipe(recipe_id)
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
-    return recipe.ingredients
+    return [IngredientOut.from_orm(ing) for ing in recipe.ingredients]
 
 
 @router.put("/recipes/{recipe_id}/ingredients/price/{ingredient_id}", response_model=IngredientOut)
@@ -95,7 +97,8 @@ def update_price_ingredient_from_recipe(recipe_id: int, ingredient_id: int, payl
     facade = RecipesFacade(db)
     try:
         facade.change_price_ingredient(recipe_id, ingredient_id, payload.new_price)
-        return facade.get_ingredient(ingredient_id)
+        ingredient = facade.get_ingredient(ingredient_id)
+        return IngredientOut.from_orm(ingredient)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -105,7 +108,8 @@ def update_quantity_ingredient_from_recipe(recipe_id: int, ingredient_id: int, p
     facade = RecipesFacade(db)
     try:
         facade.change_quantity_ingredient(recipe_id, ingredient_id, payload.new_quantity)
-        return facade.get_ingredient(ingredient_id)
+        ingredient = facade.get_ingredient(ingredient_id)
+        return IngredientOut.from_orm(ingredient)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

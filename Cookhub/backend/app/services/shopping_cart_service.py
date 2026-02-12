@@ -74,7 +74,7 @@ class ShoppingCartsFacade:
                 self.shopping_cart_item_repo.add(item)
                 ingredients_added = True
         if not ingredients_added:
-            raise ValueError("This recipe doesn't have any ingredient")
+            raise ValueError("Recipe already added or empty")
 
         self.calculate_cart_price(cart_id)
         return recipe
@@ -99,6 +99,32 @@ class ShoppingCartsFacade:
         cart_items = self.shopping_cart_item_repo.find_by_shopping_cart(cart_id)
         ingredients = [item for item in cart_items if item.ingredient_id is not None]
         return ingredients
+
+    def get_aggregated_ingredients_from_cart(self, cart_id):
+        items = self.get_all_ingredients_from_cart(cart_id)
+        aggregated_internal = {}
+        for item in items:
+            key = f"{item.ingredients.name}_{item.ingredients.unit}"
+            if key not in aggregated_internal:
+                aggregated_internal[key] = {
+                    "name": item.ingredients.name,
+                    "quantity": item.quantity,
+                    "unit": item.ingredients.unit,
+                    "price": item.unit_price,
+                    "checked": item.checked
+                }
+            else:
+                aggregated_internal[key]["quantity"] += item.quantity
+                aggregated_internal[key]["price"] += item.unit_price
+
+        aggregated_visible = {}
+        for value in aggregated_internal.values():
+            name = value["name"]
+            if name not in aggregated_visible:
+                aggregated_visible[name] = [value]
+            else:
+                aggregated_visible[name].append(value)
+        return aggregated_visible
 
     def add_ingredient_to_cart(self, cart_id, name, quantity, unit, price):
         # Check if cart exists
@@ -159,15 +185,28 @@ class ShoppingCartsFacade:
         self.calculate_cart_price(item.shopping_cart_id)
 
     def delete_ingredient_from_cart(self, cart_id, ingredient_id):
+        shopping_cart = self.shopping_cart_repo.get(cart_id)
+        if not shopping_cart:
+            raise ValueError("Shopping cart not found")
         item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
             cart_id, ingredient_id
         )
-        if item:
-            self.shopping_cart_item_repo.delete(item)
+        if not item:
+            raise ValueError("Ingredient not found")
+        self.shopping_cart_item_repo.delete(item)
         self.calculate_cart_price(cart_id)
+        self.shopping_cart_item_repo.save()
+        return item
 
     def delete_recipe_from_cart(self, cart_id, recipe_id):
+        shopping_cart = self.shopping_cart_repo.get(cart_id)
+        if not shopping_cart:
+            raise ValueError("Shopping cart not found")
         items = self.shopping_cart_item_repo.find_by_cart_and_recipe(cart_id, recipe_id)
+        if not items:
+            raise ValueError("Recipe is not in the shoping cart")
         for item in items:
             self.shopping_cart_item_repo.delete(item)
+        # One commit after all the deletes
+        self.shopping_cart_item_repo.save()
         self.calculate_cart_price(cart_id)

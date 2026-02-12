@@ -1,8 +1,11 @@
 from pydantic import BaseModel, Field, field_validator
 from enum import Enum
 from app.models.shopping_cart_items import ShoppingCartItems
+from app.schemas.recipes_ingredients import RecipeOut
+from typing import Dict, List
 
 
+# Input
 class InputModel(BaseModel):
     class Config:
         extra = "forbid"
@@ -12,7 +15,7 @@ class ShoppingCartCreate(InputModel):
     user_id: int
 
 
-class UnitEnum(Enum):
+class UnitEnum(str, Enum):
     g = "g"
     kg = "kg"
     liter = "l"
@@ -31,15 +34,15 @@ class IngredientCreate(InputModel):
         return int(float(value) * 100)
 
 
-class ShoppingCartOut(InputModel):
+# Output
+class ShoppingCartOut(BaseModel):
     id: int
     user_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
-class ShoppingCartItemOut(InputModel):
+class ShoppingCartItemOut(BaseModel):
     id: int
     name: str
     quantity: float
@@ -65,7 +68,22 @@ class ShoppingCartItemOut(InputModel):
         return value / 100
 
 
-class IngredientOut(InputModel):
+class IngredientsAggregated(BaseModel):
+    name: str
+    quantity: float
+    unit: UnitEnum
+    price: float
+    checked: bool
+
+    @field_validator("price", mode="before")
+    def convert_price_to_euros(cls, value):
+        if value is None:
+            return None
+        return value / 100
+ShoppingCartAggregated = Dict[str, List[IngredientsAggregated]]
+
+
+class IngredientOut(BaseModel):
     id: int
     name: str
     quantity: float
@@ -80,3 +98,8 @@ class IngredientOut(InputModel):
         if value is None:
             return None
         return value / 100
+
+
+class ShoppingCartFullOut(ShoppingCartOut):
+    recipes: List[RecipeOut]
+    ingredients: ShoppingCartAggregated

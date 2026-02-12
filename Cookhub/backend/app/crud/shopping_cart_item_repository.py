@@ -31,3 +31,6 @@ class ShoppingCartItemRepository(SqlAlchemyRepository):
             .filter_by(shopping_cart_id=shopping_cart_id, recipe_id=recipe_id)
             .all()
         )
+
+    def delete(self, item):
+        self.session.delete(item)
