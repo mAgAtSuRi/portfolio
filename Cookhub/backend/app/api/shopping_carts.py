@@ -5,6 +5,7 @@ from app.services.recipes_service import RecipesFacade
 from app.schemas.shopping_carts import (ShoppingCartCreate,
                                         ShoppingCartOut,
                                         IngredientCreate,
+                                        ItemUpdate,
                                         ShoppingCartItemOut,
                                         ShoppingCartAggregated,
                                         ShoppingCartFullOut)
@@ -34,7 +35,7 @@ def add_recipe_to_cart(shopping_cart_id: int, recipe_id: int, db=Depends(get_db)
     facade = ShoppingCartsFacade(db)
     try:
         recipe = facade.add_recipe_to_cart(shopping_cart_id, recipe_id)
-        return recipe
+        return RecipeOut.from_orm(recipe)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -49,7 +50,7 @@ def get_cart_by_user(user_id: int, db=Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/shopping_cart/{cart_id}/ingredient", response_model=ShoppingCartItemOut)
+@router.post("/shopping_cart/{cart_id}/ingredients", response_model=ShoppingCartItemOut)
 def add_ingredient_to_shopping_cart(cart_id: int, ingredient: IngredientCreate, db=Depends(get_db)):
     facade = ShoppingCartsFacade(db)
     shopping_cart = facade.get_shopping_cart(cart_id)
@@ -78,8 +79,11 @@ def get_all_recipes_from_cart(cart_id: int, db=Depends(get_db)):
 @router.get("/shopping_cart/{cart_id}/ingredients", response_model=list[ShoppingCartItemOut])
 def get_all_ingredients_from_cart(cart_id: int, db=Depends(get_db)):
     facade = ShoppingCartsFacade(db)
-    items = facade.get_all_ingredients_from_cart(cart_id)
-    return [ShoppingCartItemOut.from_orm_item(item) for item in items]
+    try:
+        items = facade.get_all_ingredients_from_cart(cart_id)
+        return [ShoppingCartItemOut.from_orm_item(item) for item in items]
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/shopping_cart/{cart_id}/aggregated", response_model=ShoppingCartAggregated)
@@ -88,6 +92,26 @@ def get_agregated_ingredients_from_cart(cart_id: int, db=Depends(get_db)):
     try:
         items = facade.get_aggregated_ingredients_from_cart(cart_id)
         return items
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.put("/shopping_cart/items/{item_id}", response_model=ShoppingCartItemOut)
+def update_ingredient_in_cart(item_id: int, payload: ItemUpdate, db=Depends(get_db)):
+    facade = ShoppingCartsFacade(db)
+    try:
+        item = facade.update_cart_item(item_id, payload.quantity, payload.price)
+        return ShoppingCartItemOut.from_orm_item(item)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.patch("/shopping_cart/items/{item_id}/toggle", response_model=ShoppingCartItemOut)
+def toggle_cart_item(item_id: int, db=Depends(get_db)):
+    facade = ShoppingCartsFacade(db)
+    try:
+        item = facade.toggle_item(item_id)
+        return ShoppingCartItemOut.from_orm_item(item)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -111,6 +135,17 @@ def get_full_cart_by_user(user_id: int, db=Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
 
 
+@router.get("/shopping_cart/{cart_id}/total_cost")
+def get_cart_cost(cart_id: int, db=Depends(get_db)):
+    facade = ShoppingCartsFacade(db)
+    try:
+        total = facade.calculate_cart_price(cart_id)
+        return {"total_cost": total / 100,
+                "currency": "EUR"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.delete("/shopping_cart/{cart_id}/recipes/{recipe_id}")
 def delete_recipe_from_cart(cart_id: int, recipe_id: int, db=Depends(get_db)):
     facade = ShoppingCartsFacade(db)
@@ -127,6 +162,6 @@ def delete_ingredient_from_cart(cart_id: int, ingredient_id: int, db=Depends(get
     facade = ShoppingCartsFacade(db)
     try:
         item = facade.delete_ingredient_from_cart(cart_id, ingredient_id)
-        return {"status": f"{item.name} deleted"}
+        return {"status": f"{item.ingredients.name} deleted"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

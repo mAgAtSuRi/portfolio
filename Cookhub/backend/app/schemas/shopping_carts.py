@@ -34,6 +34,18 @@ class IngredientCreate(InputModel):
         return int(float(value) * 100)
 
 
+class ItemUpdate(InputModel):
+    quantity: float | None = None
+    price: float | None = None
+
+    @field_validator("price", mode="before")
+    @classmethod
+    def convert_price_to_cents(cls, value):
+        if value is None:
+            return None
+        return int(float(value) * 100)
+
+
 # Output
 class ShoppingCartOut(BaseModel):
     id: int
@@ -49,6 +61,8 @@ class ShoppingCartItemOut(BaseModel):
     unit: UnitEnum = UnitEnum.g
     price: float
     checked: bool
+
+    model_config = {"from_attributes": True}
 
     @classmethod
     def from_orm_item(cls, item: ShoppingCartItems):

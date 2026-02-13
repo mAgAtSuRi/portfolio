@@ -62,6 +62,8 @@ class ShoppingCartsFacade:
 
             if item:
                 item.quantity += ing.quantity
+                item.unit_price += ing.price
+                self.shopping_cart_item_repo.save()
             else:
                 item = ShoppingCartItems(
                     shopping_cart_id=cart_id,
@@ -136,7 +138,9 @@ class ShoppingCartsFacade:
         item = self.ingredient_repo.get_cart_item_by_name(name, cart_id)
         if item:
             item.quantity += quantity
+            item.unit_price += price
             self.shopping_cart_item_repo.save()
+            self.calculate_cart_price(cart_id)
             return item
 
         # Else create new ingredient for cart
@@ -154,28 +158,63 @@ class ShoppingCartsFacade:
             shopping_cart_id=cart_id,
             ingredient_id=ingredient.id,
             quantity=quantity,
-            unit_price=ingredient.price,
+            unit_price=price,
             checked=False,
         )
-        return self.shopping_cart_item_repo.add(item)
+        item = self.shopping_cart_item_repo.add(item)
+        self.calculate_cart_price(cart_id)
+        return item
 
-    def update_ingredient(self, cart_id, ingredient_id, quantity, price):
-        cart_item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
-            cart_id, ingredient_id
-        )
-        if not cart_item:
-            raise ValueError("Ingredient not found")
-        cart_item.quantity = quantity
-        cart_item.unit_price = price
+    # def update_ingredient(self, cart_id, ingredient_id, quantity, price):
+    #     cart_item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
+    #         cart_id, ingredient_id
+    #     )
+    #     if not cart_item:
+    #         raise ValueError("Ingredient not found")
+    #     if quantity is not None:
+    #         cart_item.quantity = quantity
+    #     if price is not None:
+    #         cart_item.unit_price = price
+    #     self.shopping_cart_item_repo.save()
+    #     return cart_item
+
+    def update_cart_item(self, item_id, quantity, price):
+        item = self.shopping_cart_item_repo.get(item_id)
+        if not item:
+            raise ValueError("Item not found")
+        if quantity is not None:
+            # Recalculate price proportionnally
+            old_quantity = item.quantity
+            if old_quantity > 0:
+                unit_price = item.unit_price / old_quantity
+                item.unit_price = int(unit_price * quantity)
+            item.quantity = quantity
+        if price is not None:
+            item.unit_price = price
+        self.shopping_cart_item_repo.save()
+        self.calculate_cart_price(item.shopping_cart_id)
+        return item
 
     def calculate_cart_price(self, cart_id):
         cart = self.shopping_cart_repo.get(cart_id)
+        if not cart:
+            raise ValueError("Shopping cart not found")
+
+        total_items = 0
         items = self.shopping_cart_item_repo.find_by_shopping_cart(cart_id)
-        total = 0
         for item in items:
             if item.checked is False:
-                total += item.quantity * item.unit_price
-        cart.total_cost = total
+                total_items += item.unit_price
+
+        total_recipes = 0
+        recipes = self.get_recipes_from_cart(cart_id)
+        for recipe in recipes:
+            for ing in recipe.ingredients:
+                total_recipes += ing.price
+
+        cart.total_cost = total_items + total_recipes
+        self.shopping_cart_repo.save()
+        return cart.total_cost
 
     def toggle_item(self, cart_item_id):
         item = self.shopping_cart_item_repo.get(cart_item_id)
@@ -183,12 +222,14 @@ class ShoppingCartsFacade:
             raise ValueError("Item not found")
         item.checked = not item.checked
         self.calculate_cart_price(item.shopping_cart_id)
+        self.shopping_cart_item_repo.save()
+        return item
 
     def delete_ingredient_from_cart(self, cart_id, ingredient_id):
         shopping_cart = self.shopping_cart_repo.get(cart_id)
         if not shopping_cart:
             raise ValueError("Shopping cart not found")
-        item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
+        item = self.shopping_cart_item_repo.get(
             cart_id, ingredient_id
         )
         if not item:

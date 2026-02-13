@@ -61,8 +61,8 @@ def update_recipe(recipe_id: int, payload: RecipeUpdate, db=Depends(get_db)):
 def delete_recipe(recipe_id: int, db=Depends(get_db)):
     facade = RecipesFacade(db)
     try:
-        recipe = facade.remove_recipe(recipe_id)
-        return {"status": f"{recipe.name} deleted"}
+        recipe_name = facade.remove_recipe(recipe_id)
+        return {"status": f"{recipe_name} deleted"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -118,7 +118,7 @@ def update_quantity_ingredient_from_recipe(recipe_id: int, ingredient_id: int, p
 def delete_ingredient_from_recipe(recipe_id: int, ingredient_id: int, db=Depends(get_db)):
     facade = RecipesFacade(db)
     try:
-        ingredient = facade.remove_ingredient(recipe_id, ingredient_id)  
-        return {"status": f"{ingredient.name} deleted"}
+        ingredient_name = facade.remove_ingredient(recipe_id, ingredient_id)  
+        return {"status": f"{ingredient_name} deleted"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

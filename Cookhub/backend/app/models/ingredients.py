@@ -14,4 +14,4 @@ class Ingredients(Base):
     recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=True) #An ingredient can exist without recipe (ex: for shopping_cart)
 
     recipe = relationship("Recipes", back_populates="ingredients")
-    shopping_cart_items = relationship("ShoppingCartItems", back_populates="ingredients")
+    shopping_cart_items = relationship("ShoppingCartItems", back_populates="ingredients", cascade="all, delete-orphan")
