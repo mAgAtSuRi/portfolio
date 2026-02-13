@@ -1,5 +1,6 @@
-from ..db.base import Base
+from app.db.base import Base
 from sqlalchemy import Column, String, Integer, Float, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class Ingredients(Base):
@@ -8,5 +9,9 @@ class Ingredients(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     quantity = Column(Float)
+    unit = Column(String(10), nullable=False, default="g")
     price = Column(Integer)
     recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=True) #An ingredient can exist without recipe (ex: for shopping_cart)
+
+    recipe = relationship("Recipes", back_populates="ingredients")
+    shopping_cart_items = relationship("ShoppingCartItems", back_populates="ingredients", cascade="all, delete-orphan")
