@@ -157,11 +157,11 @@ def delete_recipe_from_cart(cart_id: int, recipe_id: int, db=Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.delete("/shopping_cart/{cart_id}/ingredients/{ingredient_id}")
-def delete_ingredient_from_cart(cart_id: int, ingredient_id: int, db=Depends(get_db)):
+@router.delete("/shopping_cart/{cart_id}/items/{item_id}")
+def delete_ingredient_from_cart(cart_id: int, item_id: int, db=Depends(get_db)):
     facade = ShoppingCartsFacade(db)
     try:
-        item = facade.delete_ingredient_from_cart(cart_id, ingredient_id)
-        return {"status": f"{item.ingredients.name} deleted"}
+        item_name = facade.delete_item_from_cart(cart_id, item_id)
+        return {"status": f"{item_name} deleted"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
