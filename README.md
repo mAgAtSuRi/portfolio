@@ -28,3 +28,5 @@ alembic:
 	apply migration to db: alembic upgrade head
 
 FastAPI/Uvicorn: pip install fastapi uvicorn Lancer le serveur: uvicorn app.main:app --reload
+
+jwt token: pip install python-jose[cryptography]--break-system-packages
