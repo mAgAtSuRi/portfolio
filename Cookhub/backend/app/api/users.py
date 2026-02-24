@@ -72,7 +72,7 @@ def update_password(user_id: int,
                     payload: PasswordUpdate,
                     db=Depends(get_db),
                     current_user=Depends(get_current_user)):
-    if current_user.user_id != user_id and not current_user.is_admin:
+    if current_user.id != user_id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="You can only change your password")
 
     facade = UsersFacade(db)
@@ -96,4 +96,4 @@ def delete_user(user_id: int,
         user = facade.delete_user(user_id)
         return {"status": f"{user.username} with id = {user.id} deleted"}
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e))

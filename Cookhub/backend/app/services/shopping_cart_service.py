@@ -39,6 +39,15 @@ class ShoppingCartsFacade:
             raise ValueError("This user doesn't have a cart")
         return cart
 
+    def get_shopping_cart_by_item(self, item_id):
+        item = self.shopping_cart_item_repo.get(item_id)
+        if not item:
+            raise ValueError("Shopping cart item not found")
+        cart = self.shopping_cart_item_repo.get(item.shopping_cart_id)
+        if not cart:
+            raise ValueError("Cart not found")
+        return cart
+
     def get_all_shopping_carts(self):
         return self.shopping_cart_repo.list()
 

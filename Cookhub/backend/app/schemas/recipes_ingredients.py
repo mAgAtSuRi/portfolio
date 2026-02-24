@@ -10,7 +10,6 @@ class InputModel(BaseModel):
 
 class RecipeCreate(InputModel):
     name: str
-    user_id: int
     total_price: float | None = None
     description: str | None = None
 
