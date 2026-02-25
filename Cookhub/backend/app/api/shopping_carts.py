@@ -68,10 +68,7 @@ def get_cart_by_user(user_id: int,
     if not shopping_cart:
         raise HTTPException(status_code=404, detail="Shopping cart not found")
     check_cart_owner_or_admin(shopping_cart, current_user)
-    try:
-        return shopping_cart
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    return shopping_cart
 
 
 @router.post("/shopping_cart/{cart_id}/ingredients", response_model=ShoppingCartItemOut)
@@ -155,7 +152,7 @@ def update_ingredient_in_cart(item_id: int,
     facade = ShoppingCartsFacade(db)
     shopping_cart = facade.get_shopping_cart_by_item(item_id)
     if not shopping_cart:
-        raise HTTPException(status_code=404, detail="Shopping cart bot found")
+        raise HTTPException(status_code=404, detail="Shopping cart not found")
     check_cart_owner_or_admin(shopping_cart, current_user)
     try:
         item = facade.update_cart_item(item_id, payload.quantity, payload.price)

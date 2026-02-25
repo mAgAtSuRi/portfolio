@@ -26,8 +26,9 @@ def create_user(user: UserCreate,
 
 
 @router.get("/users", response_model=list[UserOut])
-def list_users(db=Depends(get_db)):
-    # Add  current_admin=Depends(get_current_admin) in body function
+def list_users(db=Depends(get_db),
+               current_admin=Depends(get_current_admin)
+               ):
     facade = UsersFacade(db)
     return facade.get_all_user()
 
