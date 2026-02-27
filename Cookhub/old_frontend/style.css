@@ -1,0 +1,21 @@
+:root {
+	--background-color: #C1E59F
+	--header-color: white
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--header-color);
+    padding: 1rem;
+}
+
+/* Logo */
+header a img {
+  height: 150px;
+}
+
+main {
+	background-color: var(--background-color);
+}
