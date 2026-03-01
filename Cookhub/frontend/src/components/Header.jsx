@@ -1,6 +1,13 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Header() {
+    const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/login')
+    }
+
     return (
         <header className="bg-white">
             <div className="px-4 flex justify-between items-center">
@@ -15,9 +22,15 @@ function Header() {
                         <button className="btn btn-ghost">Shopping List</button>
                     </Link>
                 </nav>
-                <Link to="/login">
-                    <button className="btn btn-outline">Login</button>
-                </Link>
+                {token ? (
+                    <button className='btn btn-ouline' onClick={handleLogout}>
+                        Logout
+                    </button>
+                ) : (
+                    <Link to="/login">
+                        <button className='btn btn-outline'>Login</button>
+                    </Link>
+                )}
             </div>
         </header>
     );
