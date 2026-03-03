@@ -32,5 +32,8 @@ FastAPI/Uvicorn: pip install fastapi uvicorn Lancer le serveur: uvicorn app.main
 jwt token: pip install python-jose[cryptography]--break-system-packages
 
 npm install tailwindcss @tailwindcss/vite daisyui
+Cookhub/frontend;
+	-npm install
+	-npm run dev
 to navigate between pages:
 npm install react-router-dom
