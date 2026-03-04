@@ -4,7 +4,7 @@ function RecipeCard({ recipe, onDelete }) {
       <figure className="relative h-48 overflow-hidden">
         <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />  {/* ← 2. utilise les props */}
 
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 left-3">
           <input
             type="checkbox"
             className="checkbox  bg-white border-white"
@@ -16,7 +16,7 @@ function RecipeCard({ recipe, onDelete }) {
       
         {/* Discard icon https://heroicons.com/ */}
         <button
-          className="absolute top-3 left-3 btn btn-circle btn-sm bg-white border-none"
+          className="absolute top-3 right-3 btn btn-circle btn-sm bg-white border-none"
           onClick={() => document.getElementById(`modal-${recipe.id}`).showModal()}
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
