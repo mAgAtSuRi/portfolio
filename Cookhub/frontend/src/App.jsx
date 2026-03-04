@@ -3,7 +3,9 @@ import Header from './components/Header';
 import MyRecipes from './pages/MyRecipes';
 import ShoppingList from './pages/ShoppingList';
 import Login from './pages/Login';
+import AddRecipe from './pages/AddRecipe';
 import PrivateRoute from './components/PrivateRoute';
+
 function App() {
     return (
         <BrowserRouter>
@@ -12,6 +14,9 @@ function App() {
                 <Route path="/login" element={ <Login />} />
                 <Route path="/my-recipes" element={
                     <PrivateRoute><MyRecipes /></PrivateRoute>
+                } />
+                <Route path="/add-recipe" element={
+                    <PrivateRoute><AddRecipe /></PrivateRoute>
                 } />
                 <Route path="/shopping-list" element={
                     <PrivateRoute><ShoppingList /></PrivateRoute>
