@@ -1,4 +1,5 @@
-function RecipeCard({ recipe, onDelete }) {  
+function RecipeCard({ recipe, onDelete, onToggle }) {
+
   return (
     <div className="card bg-base-100 shadow-sm">
       <figure className="relative h-48 overflow-hidden">
@@ -8,11 +9,10 @@ function RecipeCard({ recipe, onDelete }) {
           <input
             type="checkbox"
             className="checkbox  bg-white border-white"
-            checked={false}
-            onChange={() => {}}
+            checked={recipe.selected}
+            onChange={() => onToggle(recipe.id)}
           />
         </div>
-      
       
         {/* Discard icon https://heroicons.com/ */}
         <button
