@@ -1,10 +1,10 @@
 function RecipeCard({ recipe, onDelete, onToggle }) {
 
-  
+
   return (
     <div className="card bg-base-100 shadow-sm">
       <figure className="relative h-48 overflow-hidden">
-        <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />  {/* ← 2. utilise les props */}
+        <img src={recipe.image_url} alt={recipe.name} className="w-full h-full object-cover" />
 
         <div className="absolute top-3 left-3">
           <input
@@ -27,16 +27,16 @@ function RecipeCard({ recipe, onDelete, onToggle }) {
       </figure>
 
       <div className="card-body">
-        <h2 className="card-title">{recipe.title}</h2>   
+        <h2 className="card-title">{recipe.name}</h2>   
         <div className="flex justify-between">
-          <span>{recipe.ingredients} Ingredients</span>  
-          <span>{recipe.price}$</span>                   
+          <span>{recipe.ingredients.length} Ingredients</span>  
+          <span>{recipe.total_price}$</span>                   
         </div>
       </div>
       <dialog id={`modal-${recipe.id}`} className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Delete Recipe ?</h3>
-          <p className="py-4">Are you sure you want to delete <strong>{recipe.title}</strong> ?</p>
+          <p className="py-4">Are you sure you want to delete <strong>{recipe.name}</strong> ?</p>
           <div className="modal-action">
             <form method="dialog">
               <button className="btn btn-ghost">Cancel</button>

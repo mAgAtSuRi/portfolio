@@ -12,6 +12,7 @@ class RecipeCreate(InputModel):
     name: str
     total_price: float | None = None
     description: str | None = None
+    image_url: str | None = None
 
     @field_validator("total_price", mode="before")
     def convert_price_to_cents(cls, value):
@@ -86,6 +87,7 @@ class RecipeOut(BaseModel):
     name: str
     user_id: int
     description: str | None
+    image_url: str | None
     ingredients: list[IngredientOut] = []
     total_price: float | None
 

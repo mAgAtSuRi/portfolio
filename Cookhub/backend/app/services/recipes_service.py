@@ -11,11 +11,11 @@ class RecipesFacade:
         self.ingredients_repo = IngredientsRepository(session)
         self.users_repo = UsersRepository(session)
 
-    def create_recipe(self, name, user_id, total_price, description):
+    def create_recipe(self, name, user_id, total_price, description, image_url):
         user = self.users_repo.get(user_id)
         if not user:
             raise ValueError("User not found")
-        recipe = Recipes(name=name, user_id=user_id, total_price=total_price, description=description)
+        recipe = Recipes(name=name, user_id=user_id, total_price=total_price, description=description, image_url=image_url)
         self.recipes_repo.add(recipe)
         return recipe
 

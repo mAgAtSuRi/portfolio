@@ -24,7 +24,8 @@ def create_recipe(recipe: RecipeCreate,
             name=recipe.name,
             user_id=current_user.id,
             total_price=recipe.total_price,
-            description=recipe.description
+            description=recipe.description,
+            image_url=recipe.image_url
         )
         return RecipeOut.from_orm(recipe)
     except ValueError as e:

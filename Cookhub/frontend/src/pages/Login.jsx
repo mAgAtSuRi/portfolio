@@ -21,6 +21,7 @@ function Login() {
                 return;
             }
             localStorage.setItem('token', data.access_token);
+            localStorage.setItem('user_id', data.user.id);
             navigate('/my-recipes');
         } catch (err) {
             setError('Erreur de connexion au serveur');

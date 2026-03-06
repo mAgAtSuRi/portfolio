@@ -3,9 +3,20 @@ import { useNavigate } from "react-router-dom";
 
 function AddRecipe() {
 	const navigate = useNavigate();
+	const [recipeName, setRecipeName] = useState("");
+	const [imageUrl, setImageUrl] = useState("");
 	const [ingredients, setIngredients] = useState([
 		{name: "", quantity: "", unit: "g", price: "", pricePerUnit: ""}
 	]);
+	const [description, setDescription] = useState("")
+	const conversions = {
+		"l_ml": 1000,
+		"ml_l": 0.001,
+		"kg_g": 1000,
+		"g_kg": 0.001
+	}
+ 	const [loading, setLoading] = useState(false);
+
 	const handleAddIngredients = () => {
 		setIngredients([...ingredients, {name: "", quantity: "", unit: "g", price: "", pricePerUnit: ""}]);
 	}
@@ -25,14 +36,87 @@ function AddRecipe() {
 				return {...ing, quantity: value, price: newPrice}
 			}
 			if (field === "name") return {...ing, name: value};
-			if (field === "unit") return {...ing, unit: value};
+			if (field === "unit") {
+				const conversionKey = `${ing.unit}_${value}`;
+				const factor = conversions[conversionKey];
 
+				if (factor) {
+					const newQuantity = (parseFloat(ing.quantity) * factor).toString();
+					return {...ing, unit: value, quantity: newQuantity, pricePerUnit: ing.pricePerUnit / factor}
+				} else {
+					return {...ing, unit: value, price: "", pricePerUnit: ""}
+				}
+			}
 			return ing;
 		}));
 	}
 	const total = ingredients.reduce((sum, ing) => {
 		return sum + (parseFloat(ing.price) || 0);
 	}, 0)
+
+	const handleSave = async () => {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			alert("Please login first");
+			return;
+		}
+
+		// Validation
+		if (!recipeName.trim()) {
+			alert("Please enter a recipe name");
+			return;
+		}
+
+		setLoading(true);
+		try {
+			// Create recipe
+			const recipeRes = await fetch("http://localhost:8000/recipes", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token}`
+				},
+				body: JSON.stringify({
+					name: recipeName,
+					description: description || null,
+					image_url: imageUrl || null
+				})
+			});
+
+			if (!recipeRes.ok) {
+				throw new Error("Failed to create recipe");
+			}
+
+			const recipe = await recipeRes.json();
+			const recipeId = recipe.id;
+
+			//Add ingredients
+			for (const ing of ingredients) {
+				if (ing.name.trim()) {
+					await fetch(`http://localhost:8000/recipes/${recipeId}/ingredients`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"Authorization": `Bearer ${token}`
+						},
+						body: JSON.stringify({
+							name: ing.name,
+							quantity: parseFloat(ing.quantity) || 0,
+							unit: ing.unit,
+							price: parseFloat(ing.price) || 0
+						})
+					});
+				}
+			}
+
+			navigate("/my-recipes");
+		} catch (error) {
+			console.error(error);
+			alert("Error saving recipe: " + error.message);
+		} finally {
+			setLoading(false);
+		}
+	}
 
 	return (
 		<main className=" max-w-2xl mx-auto">
@@ -57,6 +141,8 @@ function AddRecipe() {
 						type="text"
 						placeholder="Enter recipe name"
 						className="input input-bordered w-full"
+						value={recipeName}
+						onChange={(e) => setRecipeName(e.target.value)}
 					/>
 				</div>
 
@@ -65,7 +151,10 @@ function AddRecipe() {
 					<label className="block mb-1 font-medium">Image URL</label>
 					<input
 						placeholder="https://example.com/image.jpg"
-						className="input input-bordered w-full" />
+						className="input input-bordered w-full"
+						value={imageUrl}
+						onChange={(e) => setImageUrl(e.target.value)}
+					/>
 					
 				</div>
 
@@ -97,13 +186,13 @@ function AddRecipe() {
 								<option value="kg">kg</option>
 								<option value="ml">ml</option>
 								<option value="l">l</option>
-								<option value="pcs">pcs</option>
+								<option value="piece">pieces</option>
 							</select>
 							<input
 								type="number"
 								placeholder="Price"
 								className="input input-bordered w-24"
-								value={ing.basePrice}
+								value={ing.price}
 								onChange={(e) => handleIngredientChange(index, "price", e.target.value)}
 							/>
 						</div>
@@ -117,11 +206,28 @@ function AddRecipe() {
 							<h2> Add Ingredient</h2>
 					</button>
 				</div>
+				
+				{/* Description */}
+				<div className="mt-4">
+					<label className="block mb-1 font-medium">Description</label>
+					<textarea
+						placeholder="Recipe description"
+						className="textarea textarea-bordered w-full h-32"
+						value={description}
+						onChange={(e) => setDescription(e.target.value)}
+					/>
+				</div>
 
 				{/* Footer */}
 				<div className="flex justify-between items-center mt-6">
 					<span className="font-medium">Total Price: <span className="text-warning font-bold">{total.toFixed(2)}$</span></span>
-					<button className="btn btn-warning">Save Recipe</button>
+					<button
+						className="btn btn-warning"
+						onClick={handleSave}
+						disabled={loading}
+					>
+						{loading ? "Saving..." : "Save Recipe"}
+					</button>
 				</div>
 			</div>
 		</main>
