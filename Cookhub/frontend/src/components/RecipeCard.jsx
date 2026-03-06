@@ -1,5 +1,6 @@
 function RecipeCard({ recipe, onDelete, onToggle }) {
 
+  
   return (
     <div className="card bg-base-100 shadow-sm">
       <figure className="relative h-48 overflow-hidden">
