@@ -12,6 +12,7 @@ class Recipes(Base):
     total_price = Column(Integer)  # attention prix stocké en centimes (1234 = 12,34)
     description = Column(Text, nullable=True)
     image_url = Column(String(500), nullable=True)
+    number_of_persons = Column(Integer, nullable=True)
     
     users = relationship("User", back_populates="recipes")
     ingredients = relationship("Ingredients", back_populates="recipe", cascade="all")

@@ -5,6 +5,7 @@ function AddRecipe() {
 	const navigate = useNavigate();
 	const [recipeName, setRecipeName] = useState("");
 	const [imageUrl, setImageUrl] = useState("");
+	const [numberOfPersons, setNumberOfPersons] = useState("")
 	const [ingredients, setIngredients] = useState([
 		{name: "", quantity: "", unit: "g", price: "", pricePerUnit: ""}
 	]);
@@ -81,7 +82,8 @@ function AddRecipe() {
 				body: JSON.stringify({
 					name: recipeName,
 					description: description || null,
-					image_url: imageUrl || null
+					image_url: imageUrl || null,
+					number_of_persons: parseInt(numberOfPersons) || null
 				})
 			});
 
@@ -147,7 +149,18 @@ function AddRecipe() {
 						onChange={(e) => setRecipeName(e.target.value)}
 					/>
 				</div>
-
+				
+				{/* Number of persons  */}
+				<div className="mb-4">
+					<label className="block mb-1 font-medium">Number of persons</label>
+					<input
+						type="number"
+						placeholder="0"
+						className="input input-bordered w-full"
+						value={numberOfPersons}
+						onChange={(e) => setNumberOfPersons(e.target.value)}
+					/>
+				</div>
 				{/* Image URL */}
 				<div>
 					<label className="block mb-1 font-medium">Image URL</label>
