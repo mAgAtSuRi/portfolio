@@ -6,7 +6,7 @@ from app.core.dependecies import get_current_user, get_current_admin
 
 router = APIRouter()
 
-
+# for admin only
 @router.post("/users", response_model=UserOut)
 def create_user(user: UserCreate,
                 db=Depends(get_db),
@@ -19,6 +19,23 @@ def create_user(user: UserCreate,
             email=user.email,
             password=user.password,
             is_admin=user.is_admin
+        )
+        return user
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+@router.post("/register", response_model=UserOut)
+def register(user: UserCreate,
+             db=Depends(get_db),
+            ):
+    facade = UsersFacade(db)
+    try:
+        user = facade.create_user(
+            username=user.username,
+            email=user.email,
+            password=user.password,
+            is_admin=False
         )
         return user
     except ValueError as e:
