@@ -66,7 +66,7 @@ class RecipesFacade:
     def add_total_price(self, recipe, total_price):
         recipe.total_price = total_price
 
-    def update_recipe(self, recipe_id, name, total_price, description):
+    def update_recipe(self, recipe_id, name, total_price, description, image_url, number_of_persons):
         recipe = self.recipes_repo.get(recipe_id)
         if not recipe:
             raise ValueError("Recipe not found")
@@ -74,6 +74,10 @@ class RecipesFacade:
             recipe.name = name
         if description is not None:
             self.add_description(recipe, description)
+        if image_url is not None:
+            recipe.image_url = image_url
+        if number_of_persons is not None:
+            recipe.number_of_persons = number_of_persons
 
         if total_price is not None:
             self.add_total_price(recipe, total_price)

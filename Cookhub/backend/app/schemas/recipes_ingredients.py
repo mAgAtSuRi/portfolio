@@ -57,6 +57,8 @@ class RecipeUpdate(InputModel):
     name: str | None = None
     total_price: float | None = None
     description: str | None = None
+    image_url: str | None = None
+    number_of_persons: int | None = None
 
     @field_validator("total_price", mode="before")
     def convert_price_to_cents(cls, value):

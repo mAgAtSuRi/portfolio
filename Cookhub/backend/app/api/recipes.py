@@ -78,7 +78,9 @@ def update_recipe(recipe_id: int,
             recipe_id,
             payload.name,
             payload.total_price,
-            payload.description
+            payload.description,
+            payload.image_url,
+            payload.number_of_persons
         )
         return RecipeOut.from_orm(updated_recipe)
     except ValueError as e:
