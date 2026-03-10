@@ -5,6 +5,7 @@ import ShoppingList from './pages/ShoppingList';
 import Login from './pages/Login';
 import AddRecipe from './pages/AddRecipe';
 import PrivateRoute from './components/PrivateRoute';
+import EditRecipe from './pages/EditRecipe';
 
 function App() {
     return (
@@ -17,6 +18,9 @@ function App() {
                 } />
                 <Route path="/add-recipe" element={
                     <PrivateRoute><AddRecipe /></PrivateRoute>
+                } />
+                <Route path="/edit-recipe/:id" element={
+                    <PrivateRoute><EditRecipe /></PrivateRoute>
                 } />
                 <Route path="/shopping-list" element={
                     <PrivateRoute><ShoppingList /></PrivateRoute>

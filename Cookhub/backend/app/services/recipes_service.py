@@ -107,6 +107,18 @@ class RecipesFacade:
         self.ingredients_repo.save()
         self.recalculate_recipe_price(recipe_id)
 
+    def update_ingredient(self, ingredient_id, name, quantity, unit, price):
+        ingredient = self.ingredients_repo.get(ingredient_id)
+        if not ingredient:
+            raise ValueError("Ingredient not found")
+        ingredient.name = name
+        ingredient.quantity = quantity
+        ingredient.unit = unit
+        ingredient.price = price
+        self.ingredients_repo.save()
+        self.recalculate_recipe_price(ingredient.recipe_id)
+        return ingredient
+
     def get_price_recipe(self, recipe_id):
         ingredients_recipe = self.ingredients_repo.get_by_recipe(recipe_id)
         total_price = 0

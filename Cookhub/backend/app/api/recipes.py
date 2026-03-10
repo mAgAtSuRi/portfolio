@@ -176,6 +176,28 @@ def update_quantity_ingredient_from_recipe(recipe_id: int,
         raise HTTPException(status_code=404, detail=str(e))
 
 
+@router.put("/recipes/{recipe_id}/ingredients/{ingredient_id}", response_model=IngredientOut)
+def update_ingredient(recipe_id: int,
+                      ingredient_id: int,
+                      payload: IngredientCreate,
+                      db=Depends(get_db),
+                      current_user=Depends(get_current_user)
+                      ):
+    facade = RecipesFacade(db)
+    recipe = facade.get_recipe(recipe_id)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe doesn't exist")
+    check_recipe_user_or_admin(recipe, current_user)
+    ingredient = facade.get_ingredient(ingredient_id)
+    if not ingredient:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+    try:
+        updated = facade.update_ingredient(ingredient_id, payload.name, payload.quantity, payload.unit, payload.price)
+        return IngredientOut.from_orm(updated)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.delete("/recipes/{recipe_id}/ingredients/{ingredient_id}")
 def delete_ingredient_from_recipe(recipe_id: int,
                                   ingredient_id: int,
