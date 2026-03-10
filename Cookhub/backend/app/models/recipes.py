@@ -11,7 +11,7 @@ class Recipes(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     total_price = Column(Integer)  # attention prix stocké en centimes (1234 = 12,34)
     description = Column(Text, nullable=True)
-    image_url = Column(String(500), nullable=True)
+    image_url = Column(Text, nullable=True)
     number_of_persons = Column(Integer, nullable=True)
     
     users = relationship("User", back_populates="recipes")
