@@ -9,7 +9,10 @@ function RecipeCard({ recipe, onDelete, onToggle }) {
       onClick={() => navigate(`/edit-recipe/${recipe.id}`)}
     >
       <figure className="relative h-48 overflow-hidden">
-        <img src={recipe.image_url} alt={recipe.name} className="w-full h-full object-cover" />
+        <img
+          src={recipe.image_url || "/default-recipe.webp"}
+          alt={recipe.name}
+          className="w-full h-full object-cover" />
 
         <div className="absolute top-3 left-3">
           <input

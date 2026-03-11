@@ -79,9 +79,16 @@ function ShoppingList() {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">Shopping List</h1>
                 {cart.recipes.length > 0 && (
-                    <button className="btn btn-error btn-outline" onClick={handleClearCart}>
-                        Clear Cart
-                    </button>
+                    <div className="flex justify-center gap-6">
+                        <button
+                            onClick={() => navigate("/my-recipes")}
+                            className="btn btn-warning">
+                                Manage Recipes
+                        </button>
+                        <button className="btn btn-error" onClick={handleClearCart}>
+                            Clear Cart
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -91,7 +98,9 @@ function ShoppingList() {
                 <>
                     {/* Recipes */}
                     <div className="mb-6">
-                        <h2 className="text-xl font-semibold mb-3">Recipes</h2>
+                            <h2 className="text-xl font-semibold mb-3">Recipes</h2>
+                            
+                        
                         <div className="flex flex-wrap gap-2">
                             {cart.recipes.map(recipe => (
                                 <div key={recipe.id} className="badge badge-lg gap-2 p-3">

@@ -105,7 +105,7 @@ function AddRecipe() {
 						},
 						body: JSON.stringify({
 							name: ing.name,
-							quantity: parseFloat(ing.quantity) || 0,
+							quantity: parseFloat(ing.quantity) || 1,
 							unit: ing.unit,
 							price: parseFloat(ing.price) || 0
 						})
