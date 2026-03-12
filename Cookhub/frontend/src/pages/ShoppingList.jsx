@@ -5,6 +5,7 @@ function ShoppingList() {
     const navigate = useNavigate();
     const [cart, setCart] = useState({ recipes: [], items: [], aggregated: {} });
     const [cartId, setCartId] = useState(null);
+    const [newIngredient, setNewIngredient] = useState({name: "", quantity: "", unit: "g", price: "", pricePerUnit: ""});
     const [loading, setLoading] = useState(true);
 
     const token = localStorage.getItem("token");
@@ -70,9 +71,39 @@ function ShoppingList() {
         fetchCart();
     }
 
+    const handleAddIngredient = async () => {
+        const token = localStorage.getItem("token");
+        if (!newIngredient.name.trim()) return; 
+
+        await fetch(`http://localhost:8000/shopping_cart/${cartId}/ingredients`, {
+            method: "POST",
+            headers: {
+                "Content-type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                name: newIngredient.name,
+                quantity: parseFloat(newIngredient.quantity) || 1,
+                unit: newIngredient.unit,
+                price: parseFloat(newIngredient.price) || 0
+
+            })
+        });
+        // Reset modal
+        setNewIngredient({ name: "", quantity: "", unit: "g", price: ""});
+        document.getElementById("modal-add-ingredient").close();
+        fetchCart();
+    }
+
     const handleClearCart = async () => {
         for (const recipe of cart.recipes) {
             await fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes/${recipe.id}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+        }
+        for (const item of cart.items) {
+            await fetch(`http://localhost:8000/shopping_cart/${cartId}/items/${item.id}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -93,7 +124,7 @@ function ShoppingList() {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">Shopping List</h1>
-                {cart.recipes.length > 0 && (
+                {(cart.recipes.length > 0 || cart.items.length > 0) && (
                     <div className="flex justify-center gap-6">
                         <button
                             onClick={() => navigate("/my-recipes")}
@@ -107,15 +138,35 @@ function ShoppingList() {
                 )}
             </div>
 
-            {cart.recipes.length === 0 ? (
-                <p className="text-gray-500">Your cart is empty. <span className="text-warning cursor-pointer" onClick={() => navigate('/my-recipes')}>Add some recipes !</span></p>
+            {cart.recipes.length === 0 && cart.items.length === 0 ? (
+                // If cart is empty
+                <div>
+                    <p className="text-gray-500">Your cart is empty. <br /><br />
+                    <div className="flex gap-4 items-center">
+                        <button
+                            className="btn btn-error"
+                            onClick={() => document.getElementById("modal-add-ingredient").showModal()}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <h2>Add Ingredient</h2>
+                        </button>
+                        <button
+                            className="btn btn-warning"
+                            onClick={() => navigate('/my-recipes')}
+                        >
+                            Add some recipes !
+                        </button>
+                    </div> 
+                    </p>
+                </div>
+                
             ) : (
                 <>
                     {/* Recipes */}
                     <div className="mb-6">
-                            <h2 className="text-xl font-semibold mb-3">Recipes</h2>
-                            
-                        
+                        <h2 className="text-xl font-semibold mb-3">Recipes</h2>    
                         <div className="flex flex-wrap gap-2">
                             {cart.recipes.map(recipe => (
                                 <div key={recipe.id} className="badge badge-lg gap-2 p-3">
@@ -174,12 +225,72 @@ function ShoppingList() {
                         </table>
 
                         {/* Total */}
-                        <div className="flex justify-end mt-4 pt-4 border-t">
+                        <div className="flex justify-between mt-4 pt-4 border-t">
+                            <button
+                                className="btn btn-soft btn-error"
+                                onClick={() => document.getElementById("modal-add-ingredient").showModal()}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                <h2>Add Ingredient</h2>
+                            </button>
                             <span className="text-xl font-bold">Total: <span className="text-warning">{totalPrice.toFixed(2)}$</span></span>
                         </div>
                     </div>
                 </>
             )}
+
+            {/* Modal Add Ingredient */}
+            <dialog id="modal-add-ingredient" className="modal">
+                <div className="modal-box">
+                    <h3 className="font-bold text-lg mb-4">Add Ingredient</h3>
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            placeholder="Name"
+                            className="input input-bordered flex-1"
+                            value={newIngredient.name}
+                            onChange={(e) => setNewIngredient({...newIngredient, name: e.target.value})}
+                        />
+                        <input
+                            type="number"
+                            placeholder="Quantity"
+                            className="input input-bordered flex-1"
+                            value={newIngredient.quantity}
+                            onChange={(e) => setNewIngredient({...newIngredient, quantity: e.target.value})}
+                        />
+                        <select
+                            className="select select-bordered w-24"
+                            value={newIngredient.unit}
+                            onChange={(e) => setNewIngredient({...newIngredient, unit: e.target.value})}
+                        >
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="l">l</option>
+                            <option value="piece">pieces</option>
+                        </select>
+                        <input
+                            type="number"
+                            placeholder="Price"
+                            className="input input-bordered w-20"
+                            value={newIngredient.price}
+                            onChange={(e) => setNewIngredient({...newIngredient, price: e.target.value})}
+                        />
+                    </div>
+                    <div className="modal-action">
+                        <form method="dialog">
+                            <button className="btn btn-ghost">Cancel</button>
+                        </form>
+                        <button
+                            className="btn btn-warning"
+                            onClick={handleAddIngredient}>
+                                Add
+                        </button>
+                    </div>
+                </div>
+            </dialog>
         </main>
     )
 }
