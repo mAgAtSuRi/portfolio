@@ -143,7 +143,7 @@ class ShoppingCartsFacade:
             raise ValueError("Shopping cart not found")
 
         # Check if ingredient exists in cart
-        item = self.ingredient_repo.get_cart_item_by_name(name, cart_id)
+        item = self.ingredient_repo.get_cart_item_by_name_and_unit(name, unit, cart_id)
         if item:
             item.quantity += quantity
             item.unit_price += price
