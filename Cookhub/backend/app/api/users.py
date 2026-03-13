@@ -2,12 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.db.session import get_db
 from app.services.users_service import UsersFacade
 from app.schemas.users import UserCreate, UserOut, EmailUpdate, PasswordUpdate
+from app.core.dependecies import get_current_user, get_current_admin
 
 router = APIRouter()
 
-
+# for admin only
 @router.post("/users", response_model=UserOut)
-def create_user(user: UserCreate, db=Depends(get_db)):
+def create_user(user: UserCreate,
+                db=Depends(get_db),
+                current_admin=Depends(get_current_admin)
+                ):
     facade = UsersFacade(db)
     try:
         user = facade.create_user(
@@ -21,14 +25,39 @@ def create_user(user: UserCreate, db=Depends(get_db)):
         raise HTTPException(status_code=409, detail=str(e))
 
 
+@router.post("/register", response_model=UserOut)
+def register(user: UserCreate,
+             db=Depends(get_db),
+            ):
+    facade = UsersFacade(db)
+    try:
+        user = facade.create_user(
+            username=user.username,
+            email=user.email,
+            password=user.password,
+            is_admin=False
+        )
+        return user
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
 @router.get("/users", response_model=list[UserOut])
-def list_users(db=Depends(get_db)):
+def list_users(db=Depends(get_db)
+            #    current_admin=Depends(get_current_admin)
+               ):
     facade = UsersFacade(db)
     return facade.get_all_user()
 
 
 @router.get("/users/{user_id}", response_model=UserOut)
-def get_user(user_id: int, db=Depends(get_db)):
+def get_user(user_id: int,
+             db=Depends(get_db),
+             current_user=Depends(get_current_user)
+             ):
+    if current_user.id != user_id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="You're not allowed to view other users")
+
     facade = UsersFacade(db)
     user = facade.get_user(user_id)
     if not user:
@@ -37,7 +66,14 @@ def get_user(user_id: int, db=Depends(get_db)):
 
 
 @router.put("/users/{user_id}/email")
-def update_email(user_id: int, payload: EmailUpdate, db=Depends(get_db)):
+def update_email(user_id: int,
+                 payload: EmailUpdate,
+                 db=Depends(get_db),
+                 current_user=Depends(get_current_user)
+                 ):
+    if current_user.id != user_id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="You can only change your profile")
+
     facade = UsersFacade(db)
     user = facade.get_user(user_id)
     if not user:
@@ -50,7 +86,13 @@ def update_email(user_id: int, payload: EmailUpdate, db=Depends(get_db)):
 
 
 @router.put("/users/{user_id}/password")
-def update_password(user_id: int, payload: PasswordUpdate, db=Depends(get_db)):
+def update_password(user_id: int,
+                    payload: PasswordUpdate,
+                    db=Depends(get_db),
+                    current_user=Depends(get_current_user)):
+    if current_user.id != user_id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="You can only change your password")
+
     facade = UsersFacade(db)
     user = facade.get_user(user_id)
     if not user:
@@ -63,10 +105,13 @@ def update_password(user_id: int, payload: PasswordUpdate, db=Depends(get_db)):
 
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int, db=Depends(get_db)):
+def delete_user(user_id: int,
+                db=Depends(get_db),
+                current_admin=Depends(get_current_admin)
+                ):
     facade = UsersFacade(db)
     try:
         user = facade.delete_user(user_id)
         return {"status": f"{user.username} with id = {user.id} deleted"}
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e))

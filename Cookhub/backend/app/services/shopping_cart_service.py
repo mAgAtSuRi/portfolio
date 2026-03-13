@@ -39,6 +39,15 @@ class ShoppingCartsFacade:
             raise ValueError("This user doesn't have a cart")
         return cart
 
+    def get_shopping_cart_by_item(self, item_id):
+        item = self.shopping_cart_item_repo.get(item_id)
+        if not item:
+            raise ValueError("Shopping cart item not found")
+        cart = self.shopping_cart_repo.get(item.shopping_cart_id)
+        if not cart:
+            raise ValueError("Cart not found")
+        return cart
+
     def get_all_shopping_carts(self):
         return self.shopping_cart_repo.list()
 
@@ -134,7 +143,7 @@ class ShoppingCartsFacade:
             raise ValueError("Shopping cart not found")
 
         # Check if ingredient exists in cart
-        item = self.ingredient_repo.get_cart_item_by_name(name, cart_id)
+        item = self.ingredient_repo.get_cart_item_by_name_and_unit(name, unit, cart_id)
         if item:
             item.quantity += quantity
             item.unit_price += price
@@ -163,19 +172,6 @@ class ShoppingCartsFacade:
         item = self.shopping_cart_item_repo.add(item)
         self.calculate_cart_price(cart_id)
         return item
-
-    # def update_ingredient(self, cart_id, ingredient_id, quantity, price):
-    #     cart_item = self.shopping_cart_item_repo.get_by_cart_and_ingredient(
-    #         cart_id, ingredient_id
-    #     )
-    #     if not cart_item:
-    #         raise ValueError("Ingredient not found")
-    #     if quantity is not None:
-    #         cart_item.quantity = quantity
-    #     if price is not None:
-    #         cart_item.unit_price = price
-    #     self.shopping_cart_item_repo.save()
-    #     return cart_item
 
     def update_cart_item(self, item_id, quantity, price):
         item = self.shopping_cart_item_repo.get(item_id)

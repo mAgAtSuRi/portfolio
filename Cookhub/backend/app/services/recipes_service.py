@@ -11,11 +11,18 @@ class RecipesFacade:
         self.ingredients_repo = IngredientsRepository(session)
         self.users_repo = UsersRepository(session)
 
-    def create_recipe(self, name, user_id, total_price, description):
+    def create_recipe(self, name, user_id, total_price, description, image_url, number_of_persons):
         user = self.users_repo.get(user_id)
         if not user:
             raise ValueError("User not found")
-        recipe = Recipes(name=name, user_id=user_id, total_price=total_price, description=description)
+        recipe = Recipes(
+            name=name,
+            user_id=user_id,
+            total_price=total_price,
+            description=description,
+            image_url=image_url,
+            number_of_persons=number_of_persons
+        )
         self.recipes_repo.add(recipe)
         return recipe
 
@@ -59,7 +66,7 @@ class RecipesFacade:
     def add_total_price(self, recipe, total_price):
         recipe.total_price = total_price
 
-    def update_recipe(self, recipe_id, name, total_price, description):
+    def update_recipe(self, recipe_id, name, total_price, description, image_url, number_of_persons):
         recipe = self.recipes_repo.get(recipe_id)
         if not recipe:
             raise ValueError("Recipe not found")
@@ -67,6 +74,10 @@ class RecipesFacade:
             recipe.name = name
         if description is not None:
             self.add_description(recipe, description)
+        if image_url is not None:
+            recipe.image_url = image_url
+        if number_of_persons is not None:
+            recipe.number_of_persons = number_of_persons
 
         if total_price is not None:
             self.add_total_price(recipe, total_price)
@@ -99,6 +110,18 @@ class RecipesFacade:
         ingredient.quantity = new_quantity
         self.ingredients_repo.save()
         self.recalculate_recipe_price(recipe_id)
+
+    def update_ingredient(self, ingredient_id, name, quantity, unit, price):
+        ingredient = self.ingredients_repo.get(ingredient_id)
+        if not ingredient:
+            raise ValueError("Ingredient not found")
+        ingredient.name = name
+        ingredient.quantity = quantity
+        ingredient.unit = unit
+        ingredient.price = price
+        self.ingredients_repo.save()
+        self.recalculate_recipe_price(ingredient.recipe_id)
+        return ingredient
 
     def get_price_recipe(self, recipe_id):
         ingredients_recipe = self.ingredients_repo.get_by_recipe(recipe_id)

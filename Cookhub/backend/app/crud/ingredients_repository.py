@@ -20,3 +20,16 @@ class IngredientsRepository(SqlAlchemyRepository):
             )
             .first()
         )
+
+    def get_cart_item_by_name_and_unit(self, name, unit, cart_id):
+        return (
+            self.session.query(ShoppingCartItems)
+            .join(self.model)
+            .filter(
+                ShoppingCartItems.shopping_cart_id == cart_id,
+                self.model.name == name,
+                self.model.unit == unit,
+                self.model.recipe_id.is_(None)
+            )
+            .first()
+        )
