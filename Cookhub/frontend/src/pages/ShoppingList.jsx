@@ -147,10 +147,9 @@ function ShoppingList() {
 
     if (loading) return <main className="p-6"><span className="loading loading-spinner"></span></main>
 
-    const totalPrice = cart.recipes.reduce((sum, r) => sum + r.total_price, 0)
-        + cart.items
-            .filter(it => !it.checked)
-            .reduce((sum, it) => sum + it.price, 0);
+    const totalPrice = cart.items
+        .filter(it => !it.checked)
+        .reduce((sum, it) => sum + it.price, 0);
 
     return (
         <main className="max-w-3xl mx-auto p-6">
