@@ -83,14 +83,14 @@ function MyRecipes() {
         <main className="p-6">
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-3xl font-bold">My Recipes</h1>
-                {recipes.some(r => r.selected) && (
-                    <div className="flex justify-center gap-6">
-                        <button
-                            className="btn btn-warning"
-                            onClick={() => navigate('/add-recipe')}
-                        >
-                            Create Recipe
-                        </button>
+                <div className="flex justify-center gap-6">
+                    <button
+                        className="btn btn-warning"
+                        onClick={() => navigate('/add-recipe')}
+                    >
+                        Create Recipe
+                    </button>
+                    {recipes.some(r => r.selected) && (
                         <button
                             className="btn btn-error"
                             onClick={() => navigate('/shopping-list')}
