@@ -11,6 +11,7 @@ function MyRecipes() {
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("user_id");
 
+        // Fetch recipes and cart
         Promise.all([
             fetch(`http://localhost:8000/users/${userId}/recipes`, {
                 headers: { "Authorization": `Bearer ${token}` }
@@ -22,6 +23,8 @@ function MyRecipes() {
         .then(([recipesRes, cartRes]) => Promise.all([recipesRes.json(), cartRes.json()]))
         .then(([recipesData, cartData]) => {
             const cartId = cartData.id;
+
+            //  Fetch recipes in the cart
             return fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes`, {
                 headers: { "Authorization": `Bearer ${token}` }
             })
@@ -30,7 +33,7 @@ function MyRecipes() {
                 const cartRecipeIds = new Set(cartRecipes.map(r => r.id));
                 setRecipes(recipesData.map(r => ({
                     ...r,
-                    selected: cartRecipeIds.has(r.id)
+                    selected: cartRecipeIds.has(r.id)  // Tick recipes in the cart
                 })));
                 setLoading(false);
             });
@@ -38,18 +41,22 @@ function MyRecipes() {
     }, []);
 
     const handleDelete = async (id) => {
-        const token = localStorage.getItem("token");
-        try {
-            const res = await fetch(`http://localhost:8000/recipes/${id}`, {
-                method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error("Failed to delete recipe");
-            setRecipes(recipes.filter(recipe => recipe.id !== id))
-        } catch(error) {
-            alert("Error deleting recipe: " + error.message)
-        }
-    }
+		const token = localStorage.getItem("token");
+
+		try {
+			const res = await fetch(`http://localhost:8000/recipes/${id}`, {
+				method: "DELETE",
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}
+			});
+			if (!res.ok) throw new Error("Failed to delete recipe");
+
+			setRecipes(recipes.filter(recipe => recipe.id !== id))
+		} catch(error) {
+			alert("Error deleting recipe: " + error.message)
+		}
+	}
 
     const handleToggle = async (id) => {
         const token = localStorage.getItem("token");
@@ -62,11 +69,13 @@ function MyRecipes() {
         const recipe = recipes.find(r => r.id === id);
 
         if (recipe.selected) {
+            // Delete recipe from cart if recipe was selected
             await fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes/${id}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
         } else {
+            // Add recipe to cart if recipe wasn't selected
             try {
                 await fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes/${id}`, {
                     method: "POST",
@@ -82,7 +91,7 @@ function MyRecipes() {
     return (
         <main className="p-6">
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-3xl font-bold">My Recipes</h1>
+                <h1 className="text-3xl font-bold">My Recipes</h1>             
                 <div className="flex justify-center gap-6">
                     <button
                         className="btn btn-warning"
@@ -105,7 +114,7 @@ function MyRecipes() {
             </div>
 
             <h2 className="py-4">Select the recipes you want</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-6">
                 {recipes.map((recipe) => (
                     <RecipeCard
                         key={recipe.id}
