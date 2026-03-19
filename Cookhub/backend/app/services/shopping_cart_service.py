@@ -195,19 +195,13 @@ class ShoppingCartsFacade:
         if not cart:
             raise ValueError("Shopping cart not found")
 
-        total_items = 0
+        total = 0
         items = self.shopping_cart_item_repo.find_by_shopping_cart(cart_id)
         for item in items:
             if item.checked is False:
-                total_items += item.unit_price
+                total += item.unit_price
 
-        total_recipes = 0
-        recipes = self.get_recipes_from_cart(cart_id)
-        for recipe in recipes:
-            for ing in recipe.ingredients:
-                total_recipes += ing.price
-
-        cart.total_cost = total_items + total_recipes
+        cart.total_cost = total
         self.shopping_cart_repo.save()
         return cart.total_cost
 
