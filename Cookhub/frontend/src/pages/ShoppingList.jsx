@@ -6,6 +6,7 @@ function ShoppingList() {
     const [cart, setCart] = useState({ recipes: [], items: [], aggregated: {} });
     const [cartId, setCartId] = useState(null);
     const [newIngredient, setNewIngredient] = useState({name: "", quantity: "", unit: "g", price: "", pricePerUnit: ""});
+    const [editingItem, setEditingItem] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const token = localStorage.getItem("token");
@@ -95,6 +96,23 @@ function ShoppingList() {
         fetchCart();
     }
 
+    const handleUpdateQuantity = async (name, newQuantity) => {
+        const token = localStorage.getItem("token");
+        const matchingItems = cart.items.filter(it => it.name === name);
+        for (const item of matchingItems) {
+            await fetch(`http://localhost:8000/shopping_cart/items/${item.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ quantity: parseFloat(newQuantity) || 1 })
+            });
+        }
+        setEditingItem(null);
+        fetchCart();
+    }
+
     const handleClearCart = async () => {
         for (const recipe of cart.recipes) {
             await fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes/${recipe.id}`, {
@@ -117,7 +135,10 @@ function ShoppingList() {
     });
     if (loading) return <main className="p-6"><span className="loading loading-spinner"></span></main>
 
-    const totalPrice = cart.recipes.reduce((sum, r) => sum + r.total_price, 0);
+    const totalPrice = cart.recipes.reduce((sum, r) => sum + r.total_price, 0)
+        + cart.items
+            .filter(it => !it.checked)
+            .reduce((sum, it) => sum + it.price, 0);
 
     return (
         <main className="max-w-3xl mx-auto p-6">
@@ -201,7 +222,25 @@ function ShoppingList() {
                                     return (
                                         <tr key={name} className={checked ? "opacity-50 line-through" : ""}>
                                             <td>{name}</td>
-                                            <td>{quantityDisplay}</td>
+                                            <td>
+                                                {editingItem?.name === name ? (
+                                                    <input
+                                                        type="number"
+                                                        className="input input-bordered input-sm w-24"
+                                                        value={editingItem.quantity}
+                                                        onChange={(e) => setEditingItem({ ...editingItem, quantity: e.target.value })}
+                                                        onBlur={() => handleUpdateQuantity(name, editingItem.quantity)}
+                                                        autoFocus
+                                                    />
+                                                ) : (
+                                                    <span
+                                                        className="cursor-pointer hover:underline"
+                                                        onClick={() => setEditingItem({ name, quantity: variants[0].quantity })}
+                                                    >
+                                                        {quantityDisplay}
+                                                    </span>
+                                                )}
+                                            </td>
                                             <td>{totalIngPrice.toFixed(2)}$</td>
                                             <td>
                                                 <button onClick={() => handleDeleteItem(name)}>
