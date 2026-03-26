@@ -10,7 +10,7 @@ function ShoppingList() {
     const [loading, setLoading] = useState(true);
 
     const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("user_id");${import.meta.env.VITE_API_URL}
+    const userId = localStorage.getItem("user_id");
 
     const fetchCart = async () => {
         const cartRes = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/shopping_cart`, {
