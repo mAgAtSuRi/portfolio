@@ -10,10 +10,10 @@ function ShoppingList() {
     const [loading, setLoading] = useState(true);
 
     const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("user_id");
+    const userId = localStorage.getItem("user_id");${import.meta.env.VITE_API_URL}
 
     const fetchCart = async () => {
-        const cartRes = await fetch(`http://localhost:8000/users/${userId}/shopping_cart`, {
+        const cartRes = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/shopping_cart`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
         const cartData = await cartRes.json();
@@ -21,13 +21,13 @@ function ShoppingList() {
         setCartId(id);
 
         const [recipesRes, itemsRes, aggregatedRes] = await Promise.all([
-            fetch(`http://localhost:8000/shopping_cart/${id}/recipes`, {
+            fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${id}/recipes`, {
                 headers: { "Authorization": `Bearer ${token}` }
             }),
-            fetch(`http://localhost:8000/shopping_cart/${id}/ingredients`, {
+            fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${id}/ingredients`, {
                 headers: { "Authorization": `Bearer ${token}` }
             }),
-            fetch(`http://localhost:8000/shopping_cart/${id}/aggregated`, {
+            fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${id}/aggregated`, {
                 headers: { "Authorization": `Bearer ${token}` }
             })
         ]);
@@ -43,7 +43,7 @@ function ShoppingList() {
     useEffect(() => { fetchCart(); }, []);
 
     const handleDeleteRecipe = async (recipeId) => {
-        await fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes/${recipeId}`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${cartId}/recipes/${recipeId}`, {
             method: "DELETE",
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -53,7 +53,7 @@ function ShoppingList() {
     const handleToggleItem = async (name) => {
         const matchingItems = cart.items.filter(it => it.name === name);
         for (const item of matchingItems) {
-            await fetch(`http://localhost:8000/shopping_cart/items/${item.id}/toggle`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/items/${item.id}/toggle`, {
                 method: "PATCH",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -64,7 +64,7 @@ function ShoppingList() {
     const handleDeleteItem = async (name) => {
         const matchingItems = cart.items.filter(it => it.name === name);
         for (const item of matchingItems) {
-            await fetch(`http://localhost:8000/shopping_cart/${cartId}/items/${item.id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${cartId}/items/${item.id}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -76,7 +76,7 @@ function ShoppingList() {
         const token = localStorage.getItem("token");
         if (!newIngredient.name.trim()) return; 
 
-        await fetch(`http://localhost:8000/shopping_cart/${cartId}/ingredients`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${cartId}/ingredients`, {
             method: "POST",
             headers: {
                 "Content-type": "application/json",
@@ -100,7 +100,7 @@ function ShoppingList() {
         const token = localStorage.getItem("token");
         const matchingItems = cart.items.filter(it => it.name === name);
         for (const item of matchingItems) {
-            await fetch(`http://localhost:8000/shopping_cart/items/${item.id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/items/${item.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -115,13 +115,13 @@ function ShoppingList() {
 
     const handleClearCart = async () => {
         for (const recipe of cart.recipes) {
-            await fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes/${recipe.id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${cartId}/recipes/${recipe.id}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
         }
         for (const item of cart.items) {
-            await fetch(`http://localhost:8000/shopping_cart/${cartId}/items/${item.id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${cartId}/items/${item.id}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
