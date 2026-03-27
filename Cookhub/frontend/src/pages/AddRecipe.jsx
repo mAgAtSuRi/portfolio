@@ -73,7 +73,7 @@ function AddRecipe() {
 		setLoading(true);
 		try {
 			// Create recipe
-			const recipeRes = await fetch("http://localhost:8000/recipes", {
+			const recipeRes = await fetch("${import.meta.env.VITE_API_URL}/recipes", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -97,7 +97,7 @@ function AddRecipe() {
 			//Add ingredients
 			for (const ing of ingredients) {
 				if (ing.name.trim()) {
-					await fetch(`http://localhost:8000/recipes/${recipeId}/ingredients`, {
+					await fetch(`${import.meta.env.VITE_API_URL}/recipes/${recipeId}/ingredients`, {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",

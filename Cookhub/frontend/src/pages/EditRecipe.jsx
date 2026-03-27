@@ -59,7 +59,7 @@ function EditRecipe() {
 		if (ing.id) {
 			const token = localStorage.getItem("token");
 			try {
-				const res = await fetch(`http://localhost:8000/recipes/${id}/ingredients/${ing.id}`, {
+				const res = await fetch(`${import.meta.env.VITE_API_URL}/recipes/${id}/ingredients/${ing.id}`, {
 					method: "DELETE",
 					headers: { "Authorization": `Bearer ${token}` }
 				});
@@ -84,7 +84,7 @@ function EditRecipe() {
 		setLoading(true);
 		try {
 			// Update recipe
-			const recipeRes = await fetch(`http://localhost:8000/recipes/${id}`, {
+			const recipeRes = await fetch(`${import.meta.env.VITE_API_URL}/recipes/${id}`, {
 				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",
@@ -104,7 +104,7 @@ function EditRecipe() {
 
 				if (ing.id) {
 					// PUT if ingredient already exists
-					await fetch(`http://localhost:8000/recipes/${id}/ingredients/${ing.id}`, {
+					await fetch(`${import.meta.env.VITE_API_URL}/recipes/${id}/ingredients/${ing.id}`, {
 						method: "PUT",
 						headers: {
 							"Content-Type": "application/json",
@@ -119,7 +119,7 @@ function EditRecipe() {
 					});
 				} else {
 					// POST if ingredient doesn't exist
-					await fetch(`http://localhost:8000/recipes/${id}/ingredients`, {
+					await fetch(`${import.meta.env.VITE_API_URL}/recipes/${id}/ingredients`, {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
@@ -145,7 +145,7 @@ function EditRecipe() {
 	}
 	useEffect(() => {
 		const token = localStorage.getItem("token");
-		fetch(`http://localhost:8000/recipes/${id}`, {
+		fetch(`${import.meta.env.VITE_API_URL}/recipes/${id}`, {
 			headers: {"Authorization": `Bearer ${token}`}
 		})
 		.then(res => res.json())

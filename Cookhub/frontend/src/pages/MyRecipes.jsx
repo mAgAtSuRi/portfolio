@@ -13,10 +13,10 @@ function MyRecipes() {
 
         // Fetch recipes and cart
         Promise.all([
-            fetch(`http://localhost:8000/users/${userId}/recipes`, {
+            fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/recipes`, {
                 headers: { "Authorization": `Bearer ${token}` }
             }),
-            fetch(`http://localhost:8000/users/${userId}/shopping_cart`, {
+            fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/shopping_cart`, {
                 headers: { "Authorization": `Bearer ${token}` }
             })
         ])
@@ -25,7 +25,7 @@ function MyRecipes() {
             const cartId = cartData.id;
 
             //  Fetch recipes in the cart
-            return fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes`, {
+            return fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${cartId}/recipes`, {
                 headers: { "Authorization": `Bearer ${token}` }
             })
             .then(res => res.json())
@@ -44,7 +44,7 @@ function MyRecipes() {
 		const token = localStorage.getItem("token");
 
 		try {
-			const res = await fetch(`http://localhost:8000/recipes/${id}`, {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/recipes/${id}`, {
 				method: "DELETE",
 				headers: {
 					"Authorization": `Bearer ${token}`
@@ -61,7 +61,7 @@ function MyRecipes() {
     const handleToggle = async (id) => {
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("user_id");
-        const cartRes = await fetch(`http://localhost:8000/users/${userId}/shopping_cart`, {
+        const cartRes = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/shopping_cart`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
         const cartData = await cartRes.json();
@@ -70,14 +70,14 @@ function MyRecipes() {
 
         if (recipe.selected) {
             // Delete recipe from cart if recipe was selected
-            await fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes/${id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${cartId}/recipes/${id}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
         } else {
             // Add recipe to cart if recipe wasn't selected
             try {
-                await fetch(`http://localhost:8000/shopping_cart/${cartId}/recipes/${id}`, {
+                await fetch(`${import.meta.env.VITE_API_URL}/shopping_cart/${cartId}/recipes/${id}`, {
                     method: "POST",
                     headers: { "Authorization": `Bearer ${token}` }
                 });
