@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import MyRecipes from './pages/MyRecipes';
 import ShoppingList from './pages/ShoppingList';
@@ -12,6 +12,7 @@ function App() {
         <BrowserRouter>
             <Header />
             <Routes>
+                <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/login" element={ <Login />} />
                 <Route path="/my-recipes" element={
                     <PrivateRoute><MyRecipes /></PrivateRoute>
