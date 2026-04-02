@@ -37,3 +37,12 @@ Cookhub/frontend;
 	-npm run dev
 to navigate between pages:
 npm install react-router-dom
+
+start backend:
+cd Cookhub/backend
+source venv/bin/activate
+uvicorn app.main:app --reload
+
+start frontend:
+cd Cookhub/frontend
+npm run dev
